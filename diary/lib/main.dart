@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -48,23 +49,45 @@ class _ContactListPageState extends State<ContactListPage> {
     }
   }
 
+  Future<void> _deleteAllContacts() async {
+    for (final contact in _contacts) {
+      await ContactsService.deleteContact(contact);
+    }
+    setState(() {
+      _contacts = [];
+    });
+    }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Contacts'),
-        ),
-        body: ListView.builder(
-          itemCount: _contacts.length,
-          itemBuilder: (context, index) {
-            Contact contact = _contacts.elementAt(index);
-            return ListTile(
-              title: Text(contact.displayName ?? ''),
-              subtitle: Text((contact.phones?.length ?? 0) > 0
-                  ? contact.phones!.elementAt(0).value ?? ''
-                  : ''),
-            );
-          },
-        ));
+      appBar: AppBar(
+        title: const Text('Contacts'),
+      ),
+      body: _contacts != null
+          ? ListView.builder(
+              itemCount: _contacts.length,
+              itemBuilder: (context, index) {
+                Contact contact = _contacts.elementAt(index);
+                return ListTile(
+                  leading: CircleAvatar(
+                    child: Text(contact.initials()),
+                  ),
+                  title: Text(contact.displayName ?? ''),
+                  subtitle: Text((contact.phones?.length ?? 0) > 0
+                      ? contact.phones!.elementAt(0).value ?? ''
+                      : ''),
+                );
+              },
+            )
+          : const Center(
+              child: CircularProgressIndicator(),
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _deleteAllContacts,
+        tooltip: 'Delete All Contacts',
+        child: const Icon(Icons.delete),
+      ),
+    );
   }
 }
