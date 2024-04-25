@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,46 +11,87 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'WhatsApp Chat',
+      title: 'Contact Saving App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(),
+      home: const ContactSavePage(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  final String phoneNumber = "+918085904091";
+class ContactSavePage extends StatefulWidget {
+  const ContactSavePage({super.key});
 
-  const MyHomePage(
-      {super.key}); // Replace this with the desired WhatsApp number
+  @override
+  _ContactSavePageState createState() => _ContactSavePageState();
+}
 
-  void _launchWhatsApp(BuildContext context) async {
-    String url = "https://wa.me/$phoneNumber?text=Hello+There!";
-    if (await canLaunchUrlString(url)) {
-      await launchUrlString(url);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Could not launch WhatsApp"),
-      ));
-    }
-  }
+class _ContactSavePageState extends State<ContactSavePage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("WhatsApp Chat"),
+        title: const Text('Save Contact'),
       ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            _launchWhatsApp(context);
-          },
-          child: const Text("Chat on WhatsApp"),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Name',
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            TextField(
+              controller: _phoneNumberController,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                labelText: 'Phone Number',
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: _saveContact,
+              child: const Text('Save Contact'),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  void _saveContact() async {
+    if (_nameController.text.isNotEmpty &&
+        _phoneNumberController.text.isNotEmpty) {
+      final newContact = Contact()
+        ..name.first = _nameController.text
+        ..phones = [Phone(_phoneNumberController.text)];
+
+      try {
+        await newContact.insert();
+        _showSnackbar('Contact saved successfully');
+        // _nameController.clear();
+        // _phoneNumberController.clear();
+      } catch (e) {
+        _showSnackbar('Failed to save contact');
+        print(e);
+      }
+    } else {
+      _showSnackbar('Please enter name and phone number');
+    }
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+    ));
   }
 }
