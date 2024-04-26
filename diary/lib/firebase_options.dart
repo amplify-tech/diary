@@ -46,6 +46,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '128926670957',
     projectId: 'diary-contact',
     authDomain: 'diary-contact.firebaseapp.com',
+    databaseURL: 'https://diary-contact-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'diary-contact.appspot.com',
   );
 
@@ -54,6 +55,7 @@ class DefaultFirebaseOptions {
     appId: '1:128926670957:android:566b7260cc959c2cae1f64',
     messagingSenderId: '128926670957',
     projectId: 'diary-contact',
+    databaseURL: 'https://diary-contact-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'diary-contact.appspot.com',
   );
 
@@ -62,7 +64,9 @@ class DefaultFirebaseOptions {
     appId: '1:128926670957:ios:589a739a77dcc86dae1f64',
     messagingSenderId: '128926670957',
     projectId: 'diary-contact',
+    databaseURL: 'https://diary-contact-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'diary-contact.appspot.com',
+    androidClientId: '128926670957-7nim300bc9os75ptpk2je59pu2hie96l.apps.googleusercontent.com',
     iosClientId: '128926670957-f9fros9mp3u3atnvif1laa6oq4bphkd0.apps.googleusercontent.com',
     iosBundleId: 'com.example.diary',
   );
@@ -72,7 +76,9 @@ class DefaultFirebaseOptions {
     appId: '1:128926670957:ios:589a739a77dcc86dae1f64',
     messagingSenderId: '128926670957',
     projectId: 'diary-contact',
+    databaseURL: 'https://diary-contact-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'diary-contact.appspot.com',
+    androidClientId: '128926670957-7nim300bc9os75ptpk2je59pu2hie96l.apps.googleusercontent.com',
     iosClientId: '128926670957-f9fros9mp3u3atnvif1laa6oq4bphkd0.apps.googleusercontent.com',
     iosBundleId: 'com.example.diary',
   );
@@ -83,6 +89,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '128926670957',
     projectId: 'diary-contact',
     authDomain: 'diary-contact.firebaseapp.com',
+    databaseURL: 'https://diary-contact-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'diary-contact.appspot.com',
   );
+
 }
