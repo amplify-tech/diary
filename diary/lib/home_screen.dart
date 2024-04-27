@@ -56,9 +56,35 @@ class HomeScreen extends StatelessWidget {
               },
               child: const Text('Sign out'),
             ),
+            // Placeholder for the data
+            FutureBuilder(
+              future: getData(),
+              builder: (context, AsyncSnapshot<DataSnapshot> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                }
+                if (snapshot.hasData && snapshot.data!.value != null) {
+                  var data = snapshot.data!.value;
+                  return Text(data.toString());
+                } else {
+                  return Text('No data available');
+                }
+              },
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<DataSnapshot> getData() async {
+    // Get the data once
+    DatabaseEvent event = await FirebaseDatabase.instance
+        .ref()
+        .child("some_path/${user.uid}")
+        .once();
+
+    // Print the data of the snapshot
+    return event.snapshot;
   }
 }
