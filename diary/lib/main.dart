@@ -10,46 +10,59 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Multi Selection List',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(),
+      home: const MultiSelectionList(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class MultiSelectionList extends StatefulWidget {
+  const MultiSelectionList({super.key});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MultiSelectionListState createState() => _MultiSelectionListState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  List<String> items = List.generate(20, (index) => 'Item ${index + 1}');
+class _MultiSelectionListState extends State<MultiSelectionList> {
+  List<String> items = List.generate(20, (index) => 'Item $index');
   List<String> selectedItems = [];
+  bool isMultiSelecting = false;
 
-  bool isMultiSelectMode = false;
+  void _toggleSelection(String item) {
+    if (selectedItems.contains(item)) {
+      setState(() {
+        selectedItems.remove(item);
+      });
+    } else {
+      setState(() {
+        selectedItems.add(item);
+      });
+    }
+  }
+
+  void _deleteSelectedItems() {
+    setState(() {
+      items.removeWhere((item) => selectedItems.contains(item));
+      selectedItems.clear();
+      isMultiSelecting = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Multi-Select List'),
+        title: const Text('Multi Selection List'),
         actions: [
-          isMultiSelectMode
+          isMultiSelecting
               ? IconButton(
                   icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    setState(() {
-                      items.removeWhere((item) => selectedItems.contains(item));
-                      selectedItems.clear();
-                      isMultiSelectMode = false;
-                    });
-                  },
+                  onPressed: _deleteSelectedItems,
                 )
-              : Container(),
+              : const SizedBox.shrink(),
         ],
       ),
       body: ListView.builder(
@@ -58,58 +71,33 @@ class _MyHomePageState extends State<MyHomePage> {
           final item = items[index];
           return InkWell(
             onTap: () {
-              if (isMultiSelectMode) {
-                setState(() {
-                  if (selectedItems.contains(item)) {
-                    selectedItems.remove(item);
-                  } else {
-                    selectedItems.add(item);
-                  }
-                });
+              if (isMultiSelecting) {
+                _toggleSelection(item);
               }
             },
             onLongPress: () {
               setState(() {
-                isMultiSelectMode = true;
+                isMultiSelecting = true;
                 selectedItems.add(item);
               });
             },
             child: ListTile(
               title: Text(item),
-              trailing: isMultiSelectMode
-                  ? Icon(
-                      selectedItems.contains(item)
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked,
+              leading: isMultiSelecting
+                  ? Checkbox(
+                      value: selectedItems.contains(item),
+                      onChanged: (_) {
+                        _toggleSelection(item);
+                      },
                     )
+                  : null,
+              trailing: isMultiSelecting && selectedItems.contains(item)
+                  ? const Icon(Icons.check)
                   : null,
             ),
           );
         },
       ),
-      floatingActionButton: isMultiSelectMode && selectedItems.isNotEmpty
-          ? FloatingActionButton(
-              onPressed: () {
-                // Action to perform on selected items
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text('Selected Items'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: selectedItems
-                            .map((item) => Text('- $item'))
-                            .toList(),
-                      ),
-                    );
-                  },
-                );
-              },
-              child: const Icon(Icons.check),
-            )
-          : null,
     );
   }
 }
