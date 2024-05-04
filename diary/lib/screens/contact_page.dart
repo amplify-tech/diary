@@ -1,6 +1,6 @@
 import 'package:diary/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:contacts_service/contacts_service.dart';
 
 class ContactPageScreen extends StatefulWidget {
   const ContactPageScreen({super.key});
@@ -35,16 +35,16 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
       itemBuilder: (context, index) {
         return ListTile(
           leading: CircleAvatar(
-            child: _contacts![index].displayName.isNotEmpty
-                ? Text(_contacts![index].displayName[0])
+            child: _contacts![index].displayName!.isNotEmpty
+                ? Text(_contacts![index].displayName![0])
                 : const Icon(Icons.person_rounded),
           ),
-          title: Text(_contacts![index].displayName),
+          title: Text(_contacts![index].displayName ?? ""),
           subtitle: Wrap(
             spacing: 12,
             children: <Widget>[
-              Text(_contacts![index].phones.isNotEmpty
-                  ? _contacts![index].phones.first.number
+              Text(_contacts![index].phones!.isNotEmpty
+                  ? _contacts![index].phones!.first.value.toString()
                   : '(none)'),
             ],
           ),
@@ -54,12 +54,12 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
               IconButton(
                 icon: const Icon(Icons.call),
                 onPressed: () =>
-                    callNumber(_contacts![index].phones.first.number),
+                    callNumber(_contacts![index].phones!.first.value),
               ),
               IconButton(
                 icon: const Icon(Icons.chat_rounded),
                 onPressed: () =>
-                    launchWhatsApp(_contacts![index].phones.first.number),
+                    launchWhatsApp(_contacts![index].phones!.first.value),
               ),
             ],
           ),
