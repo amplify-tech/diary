@@ -1,3 +1,5 @@
+import 'package:diary/screens/contact_page.dart';
+import 'package:diary/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:diary/screens/call_log_screen.dart';
 
@@ -17,6 +19,12 @@ class _ContactNavigationState extends State<ContactNavigation> {
       appBar: AppBar(
         title: const Text('Contact Diary'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: <Widget>[
+          IconButton(
+            onPressed: _deleteContacts,
+            icon: const Icon(Icons.delete),
+          )
+        ],
       ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -47,8 +55,20 @@ class _ContactNavigationState extends State<ContactNavigation> {
       body: <Widget>[
         const Center(child: Text('Setting')),
         const CallLogScreen(),
-        const Center(child: Text('Contacts')),
+        const ContactPageScreen(),
       ][currentPageIndex],
+      floatingActionButton: const FloatingActionButton(
+        onPressed: addContact,
+        tooltip: 'Add Contact',
+        child: Icon(Icons.add),
+      ),
     );
+  }
+
+  Future<void> _deleteContacts() async {
+    print("delete1");
+    final contacts = await fetchContacts();
+    print("delete");
+    deleteContacts(contacts);
   }
 }

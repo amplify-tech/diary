@@ -1,8 +1,6 @@
+import 'package:diary/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-
 import 'package:call_log/call_log.dart';
 
 class CallLogScreen extends StatefulWidget {
@@ -62,11 +60,11 @@ class _CallLogScreenState extends State<CallLogScreen> {
             children: <Widget>[
               IconButton(
                 icon: const Icon(Icons.call),
-                onPressed: () => _callNumber(_callLogs[index].number),
+                onPressed: () => callNumber(_callLogs[index].number),
               ),
               IconButton(
                 icon: const Icon(Icons.chat_rounded),
-                onPressed: () => _launchWhatsApp(_callLogs[index].number),
+                onPressed: () => launchWhatsApp(_callLogs[index].number),
               ),
             ],
           ),
@@ -84,18 +82,5 @@ class _CallLogScreenState extends State<CallLogScreen> {
     //   print(
     //       "hello    ${DateTime.fromMillisecondsSinceEpoch(list.timestamp ?? 1 * 1000)}");
     // });
-  }
-
-  _callNumber(phoneNumber) async {
-    await FlutterPhoneDirectCaller.callNumber(phoneNumber);
-  }
-
-  _launchWhatsApp(phoneNumber) async {
-    String url = "https://wa.me/$phoneNumber";
-    try {
-      await launchUrlString(url);
-    } catch (e) {
-      return false;
-    }
   }
 }
