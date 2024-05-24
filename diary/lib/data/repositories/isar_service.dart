@@ -34,7 +34,7 @@ class IsarService {
 
   static Stream<List<MyContact>> watchContacts() {
     print("_isar fetch new");
-    return _isar.myContacts.where().watch(fireImmediately: true);
+    return _isar.myContacts.where().sortByName().watch(fireImmediately: true);
   }
 
   static Future<List<MyContact>> getAllMyContacts() async {

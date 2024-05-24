@@ -27,6 +27,7 @@ class ContactPageScreen extends StatelessWidget {
             itemCount: contacts.length,
             itemBuilder: (context, index) {
               final contact = contacts[index];
+              print(contacts.length);
               return ListTile(
                 leading:
                     CircleAvatar(child: Text(contact.name[0].toUpperCase())),
@@ -59,7 +60,7 @@ class ContactPageScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          IsarService.addMyContact(MyContact("name1", "8547656", "relative"));
+          IsarService.addMyContact(MyContact("Aaaaa", "857656", "relative"));
         },
         child: const Icon(Icons.add),
       ),

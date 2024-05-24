@@ -6,6 +6,7 @@ part 'contact.g.dart';
 class MyContact {
   Id id = Isar.autoIncrement;
   late String name;
+  @Index(unique: true, replace: true)
   late String phoneNumber;
   late String tag;
   late DateTime dateAdded = DateTime.now();
