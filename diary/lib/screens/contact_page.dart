@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:diary/data/providers/contact_provider.dart';
 import 'package:diary/data/models/contact.dart';
 import 'package:diary/utils/utils.dart';
+import 'package:diary/data/repositories/isar_service.dart';
 
 class ContactPageScreen extends StatelessWidget {
   const ContactPageScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final contactProvider = Provider.of<MyContactProvider>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('MyContacts'),
       ),
       body: StreamBuilder<List<MyContact>>(
-        stream: contactProvider.getMyContacts(),
+        stream: IsarService.watchContacts(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -50,7 +47,7 @@ class ContactPageScreen extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () {
-                        contactProvider.deleteMyContact(contact.id);
+                        IsarService.deleteMyContact(contact.id);
                       },
                     )
                   ],
@@ -62,8 +59,7 @@ class ContactPageScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          contactProvider
-              .addMyContact(MyContact("name1", "9985475658", "relative"));
+          IsarService.addMyContact(MyContact("name1", "8547656", "relative"));
         },
         child: const Icon(Icons.add),
       ),
