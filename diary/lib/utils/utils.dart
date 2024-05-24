@@ -4,7 +4,6 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:contacts_service/contacts_service.dart';
-import 'package:diary/data/repositories/isar_service.dart';
 
 // url_launcher
 Future callNumber(phoneNumber) async {
@@ -21,31 +20,28 @@ Future launchWhatsApp(phoneNumber) async {
 }
 
 // flutter_contacts
-Future<List<Contact>> fetchContacts() async {
-  List<Contact> contacts = [];
+void fetchContacts() async {
   try {
     if (await Permission.contacts.request().isGranted) {
       // contacts = (await FastContacts.getAllContacts()).cast<Contact>();
-      contacts = await ContactsService.getContacts();
-      for (var contact in contacts) {
-        final newContact = MyContact()
-          ..name = 'John'
-          ..dateAdded = DateTime.now()
-          ..name = 'John';
+      List<Contact> contactList = await ContactsService.getContacts();
+      List<MyContact> myContactList = [];
+      for (final contact in contactList) {
+        myContactList.add(MyContact(contact.displayName ?? "",
+            contact.phones!.first.value ?? "", "main"));
       }
 
-      print(x);
-      debugPrint("contact fetched ${contacts.length}");
+      debugPrint("contact fetched ${contactList.length}");
+      debugPrint("mycontact created ${myContactList.length}");
     }
   } catch (e) {
     print('Error fetching contacts: $e');
   }
-  return contacts;
 }
 
 void deleteContacts() async {
   print("wait fetching now ");
-  List<Contact> contacts = await fetchContacts();
+  List<Contact> contacts = [];
   print("deleting");
   print(contacts);
   for (final contact in contacts) {

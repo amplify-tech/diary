@@ -8,5 +8,6 @@ class MyContact {
   late String name;
   late String phoneNumber;
   late String tag;
-  late DateTime dateAdded;
+  late DateTime dateAdded = DateTime.now();
+  MyContact(this.name, this.phoneNumber, this.tag);
 }

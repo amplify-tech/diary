@@ -1,5 +1,6 @@
 import 'package:diary/screens/contact_page.dart';
 import 'package:diary/screens/setting_screen.dart';
+// import 'package:diary/widgets/extra2.dart';
 import 'package:flutter/material.dart';
 import 'package:diary/screens/call_log_screen.dart';
 
@@ -19,10 +20,10 @@ class _ContactNavigationState extends State<ContactNavigation> {
       appBar: AppBar(
         title: const Text('Contact Diary'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: <Widget>[
+        actions: const <Widget>[
           IconButton(
             onPressed: null,
-            icon: const Icon(Icons.delete),
+            icon: Icon(Icons.sync),
           )
         ],
       ),
@@ -57,11 +58,11 @@ class _ContactNavigationState extends State<ContactNavigation> {
         const CallLogScreen(),
         const ContactPageScreen(),
       ][currentPageIndex],
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null,
-        tooltip: 'Add Contact',
-        child: Icon(Icons.add),
-      ),
+      // floatingActionButton: const FloatingActionButton(
+      //   onPressed: null,
+      //   tooltip: 'Add Contact',
+      //   child: Icon(Icons.add),
+      // ),
     );
   }
 }

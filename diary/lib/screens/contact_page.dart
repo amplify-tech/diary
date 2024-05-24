@@ -1,70 +1,72 @@
-import 'package:diary/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:contacts_service/contacts_service.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:diary/data/providers/contact_provider.dart';
+import 'package:diary/data/models/contact.dart';
+import 'package:diary/utils/utils.dart';
 
-class ContactPageScreen extends StatefulWidget {
+class ContactPageScreen extends StatelessWidget {
   const ContactPageScreen({super.key});
 
   @override
-  State<ContactPageScreen> createState() => _ContactPageScreenState();
-}
-
-class _ContactPageScreenState extends State<ContactPageScreen> {
-  List<Contact>? _contacts;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchContacts();
-  }
-
-  Future _fetchContacts() async {
-    final contacts = await fetchContacts();
-    print(contacts);
-    setState(() => _contacts = contacts);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_contacts == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final contactProvider = Provider.of<MyContactProvider>(context);
 
-    return ListView.builder(
-      itemCount: _contacts!.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          leading: CircleAvatar(
-            child: _contacts![index].displayName!.isNotEmpty
-                ? Text(_contacts![index].displayName![0])
-                : const Icon(Icons.person_rounded),
-          ),
-          title: Text(_contacts![index].displayName ?? ""),
-          subtitle: Wrap(
-            spacing: 12,
-            children: <Widget>[
-              Text(_contacts![index].phones!.isNotEmpty
-                  ? _contacts![index].phones!.first.value.toString()
-                  : '(none)'),
-            ],
-          ),
-          trailing: Wrap(
-            spacing: 18,
-            children: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.call),
-                onPressed: () =>
-                    callNumber(_contacts![index].phones!.first.value),
-              ),
-              IconButton(
-                icon: const Icon(Icons.chat_rounded),
-                onPressed: () =>
-                    launchWhatsApp(_contacts![index].phones!.first.value),
-              ),
-            ],
-          ),
-        );
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('MyContacts'),
+      ),
+      body: StreamBuilder<List<MyContact>>(
+        stream: contactProvider.getMyContacts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No contacts found!'));
+          }
+          final contacts = snapshot.data!;
+          return ListView.builder(
+            itemCount: contacts.length,
+            itemBuilder: (context, index) {
+              final contact = contacts[index];
+              return ListTile(
+                leading:
+                    CircleAvatar(child: Text(contact.name[0].toUpperCase())),
+                title: Text(contact.name),
+                subtitle: Text(DateFormat('h:mm:ss a d - MMM - yyyy')
+                    .format(contact.dateAdded)),
+                trailing: Wrap(
+                  spacing: 18,
+                  children: <Widget>[
+                    IconButton(
+                      icon: const Icon(Icons.call),
+                      onPressed: () => callNumber(contact.phoneNumber),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.chat_rounded),
+                      onPressed: () => launchWhatsApp(contact.phoneNumber),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        contactProvider.deleteMyContact(contact.id);
+                      },
+                    )
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          contactProvider
+              .addMyContact(MyContact("name1", "9985475658", "relative"));
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

@@ -1,110 +1,101 @@
-import 'package:diary/data/models/contact.dart';
-import 'package:diary/data/repositories/isar_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// import 'isar_service.dart';
-// import 'models/contact.dart';
+import 'package:provider/provider.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final isarService = IsarService();
-  await isarService.openDB();
-  runApp(MyApp(isarService));
+/// This is a reimplementation of the default Flutter application using provider + [ChangeNotifier].
+
+// void main() {
+//   runApp(
+//     /// Providers are above [MyApp] instead of inside it, so that tests
+//     /// can use [MyApp] while mocking the providers
+//     MultiProvider(
+//       providers: [
+//         ChangeNotifierProvider(create: (_) => Counter()),
+//       ],
+//       child: const MyApp(),
+//     ),
+//   );
+// }
+
+/// Mix-in [DiagnosticableTreeMixin] to have access to [debugFillProperties] for the devtool
+// ignore: prefer_mixin
+class Counter with ChangeNotifier, DiagnosticableTreeMixin {
+  int _count = 0;
+
+  int get count => _count;
+
+  void increment() {
+    _count++;
+    notifyListeners();
+  }
+
+  /// Makes `Counter` readable inside the devtools by listing all of its properties
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('count', count));
+  }
 }
 
 class MyApp extends StatelessWidget {
-  final IsarService isarService;
-
-  const MyApp(this.isarService, {super.key});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Isar Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Contacts', isarService: isarService),
+    return const MaterialApp(
+      home: MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  final String title;
-  final IsarService isarService;
-
-  const MyHomePage({super.key, required this.title, required this.isarService});
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  late Future<List<Contact>> _contacts;
-
-  @override
-  void initState() {
-    super.initState();
-    _contacts = widget.isarService.getContacts();
-  }
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text('Example'),
       ),
-      body: FutureBuilder<List<Contact>>(
-        future: _contacts,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else if (snapshot.hasData) {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(snapshot.data![index].name),
-                  subtitle: Text(snapshot.data![index].phoneNumber),
-                  leading: CircleAvatar(
-                    child: Text(snapshot.data![index].name[0]),
-                  ),
-                );
-              },
-            );
-          } else {
-            return const CircularProgressIndicator();
-          }
-        },
+      body: const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('You have pushed the button this many times:'),
+
+            /// Extracted as a separate widget for performance optimization.
+            /// As a separate widget, it will rebuild independently from [MyHomePage].
+            ///
+            /// This is totally optional (and rarely needed).
+            /// Similarly, we could also use [Consumer] or [Selector].
+            Count(),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          print("1");
-          addDummyData(widget.isarService).then((_) {
-            print("4");
-            setState(() {
-              _contacts = widget.isarService.getContacts();
-            });
-            print("5");
-          });
+        key: const Key('increment_floatingActionButton'),
 
-          print("6");
-        },
-        tooltip: 'Add',
+        /// Calls `context.read` instead of `context.watch` so that it does not rebuild
+        /// when [Counter] changes.
+        onPressed: () => context.read<Counter>().increment(),
+        tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
     );
   }
 }
 
-Future<void> addDummyData(IsarService isarService) async {
-  print("2");
-  final contact = Contact()
-    ..name = 'John Doe'
-    ..phoneNumber = '123-456-7890'
-    ..tag = 'Friend'
-    ..dateAdded = DateTime.now();
+class Count extends StatelessWidget {
+  const Count({super.key});
 
-  return isarService.addContact(contact).then((_) {
-    print("3");
-  });
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      /// Calls `context.watch` to make [Count] rebuild when [Counter] changes.
+      '${context.watch<Counter>().count}',
+      key: const Key('counterState'),
+      style: Theme.of(context).textTheme.headlineMedium,
+    );
+  }
 }

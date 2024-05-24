@@ -82,12 +82,13 @@ MyContact _myContactDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = MyContact();
+  final object = MyContact(
+    reader.readString(offsets[1]),
+    reader.readString(offsets[2]),
+    reader.readString(offsets[3]),
+  );
   object.dateAdded = reader.readDateTime(offsets[0]);
   object.id = id;
-  object.name = reader.readString(offsets[1]);
-  object.phoneNumber = reader.readString(offsets[2]);
-  object.tag = reader.readString(offsets[3]);
   return object;
 }
 
