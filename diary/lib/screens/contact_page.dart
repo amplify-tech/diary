@@ -60,7 +60,7 @@ class ContactPageScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          IsarService.addMyContact(MyContact("Aaaaa", "857656", "relative"));
+          IsarService.addMyContact(MyContact("857656", "Aaaaa", "relative"));
         },
         child: const Icon(Icons.add),
       ),

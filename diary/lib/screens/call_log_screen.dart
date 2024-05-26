@@ -78,9 +78,5 @@ class _CallLogScreenState extends State<CallLogScreen> {
     setState(() {
       _callLogs = entries.toList();
     });
-    // entries.toList().forEach((list) {
-    //   print(
-    //       "hello    ${DateTime.fromMillisecondsSinceEpoch(list.timestamp ?? 1 * 1000)}");
-    // });
   }
 }

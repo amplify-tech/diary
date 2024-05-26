@@ -16,8 +16,9 @@ class _SettingScreenState extends State<SettingScreen> {
             Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
       Column(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
         ElevatedButton(onPressed: fetchContacts, child: Text('fetch')),
-        ElevatedButton(onPressed: deleteContacts, child: Text('delete')),
-        ElevatedButton(onPressed: addContact, child: Text('add')),
+        ElevatedButton(onPressed: syncFromLocal, child: Text('sync')),
+        ElevatedButton(
+            onPressed: syncAndDelete, child: Text('sync and delete ')),
       ]),
     ]));
   }

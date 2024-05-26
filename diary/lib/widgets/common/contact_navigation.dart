@@ -23,7 +23,7 @@ class _ContactNavigationState extends State<ContactNavigation> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: const <Widget>[
           IconButton(
-            onPressed: fetchContacts,
+            onPressed: syncFromLocal,
             icon: Icon(Icons.sync),
           )
         ],

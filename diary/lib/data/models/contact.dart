@@ -5,10 +5,11 @@ part 'contact.g.dart';
 @collection
 class MyContact {
   Id id = Isar.autoIncrement;
-  late String name;
   @Index(unique: true, replace: true)
   late String phoneNumber;
+  late String name;
   late String tag;
   late DateTime dateAdded = DateTime.now();
-  MyContact(this.name, this.phoneNumber, this.tag);
+
+  MyContact(this.phoneNumber, this.name, this.tag);
 }

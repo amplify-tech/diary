@@ -2,6 +2,7 @@ import 'package:diary/data/models/contact.dart';
 import 'package:diary/data/repositories/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:isar/isar.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:contacts_service/contacts_service.dart';
@@ -21,54 +22,28 @@ Future launchWhatsApp(phoneNumber) async {
 }
 
 // flutter_contacts
-void fetchContacts() async {
+Future<List<Contact>> fetchContacts() async {
   try {
     if (await Permission.contacts.request().isGranted) {
-      // contacts = (await FastContacts.getAllContacts()).cast<Contact>();
       debugPrint(" fetching ");
-      List<Contact> contactList = await ContactsService.getContacts();
-      Map<String, String> contactMap = {};
-
-      for (final contact in contactList) {
-        for (Item phone in contact.phones ?? []) {
-          if (phone.value != null) {
-            String phoneNumber = phone.value!
-                .replaceAll('+91', '')
-                .replaceAll(RegExp(r'\D'), '');
-            contactMap[phoneNumber] = contact.displayName!;
-          }
-        }
-      }
-
-      List<MyContact> myContactList = [];
-      contactMap.forEach((phoneNumber, name) {
-        myContactList.add(MyContact(name, phoneNumber, "main"));
-      });
-
-      debugPrint("contact fetched ${contactList.length}");
-      debugPrint("map fetched ${contactMap.length}");
-      debugPrint("mycontact created ${myContactList.length}");
-      IsarService.addMyContacts(myContactList);
-      debugPrint("added in db ");
+      return ContactsService.getContacts();
     }
   } catch (e) {
-    print('Error fetching contacts: $e');
+    debugPrint('Error fetching contacts: $e');
   }
+  return [];
 }
 
-void deleteContacts() async {
-  print("wait fetching now ");
-  List<Contact> contacts = [];
-  print("deleting");
-  print(contacts);
-  for (final contact in contacts) {
+void deleteContacts(List<Contact> contactList) async {
+  debugPrint("deleting");
+  for (final contact in contactList) {
     try {
       await ContactsService.deleteContact(contact);
     } catch (e) {
-      print('Error while deleting contacts: $e');
+      debugPrint('Error while deleting contacts: $e ${contact.displayName}');
     }
   }
-  print("all contact deleted");
+  debugPrint("all contact deleted");
 }
 
 void addContact() async {
@@ -78,5 +53,52 @@ void addContact() async {
       Item(label: "Mobile", value: '+918085904091'),
     ];
   await ContactsService.addContact(newContact);
-  print("new contact added $newContact");
+  debugPrint("new contact added $newContact");
 }
+
+// isar Db
+Future<List<Contact>> syncFromLocal() async {
+  List<Contact> contactList = [];
+
+  try {
+    contactList = await fetchContacts();
+    debugPrint("contact fetched ${contactList.length}");
+
+    List<MyContact> myContactList = [];
+
+    // data cleaning and ignore duplicate
+    final dbPhones = (await IsarService.isar.myContacts
+            .where()
+            .phoneNumberProperty()
+            .findAll())
+        .toSet();
+
+    for (final contact in contactList) {
+      for (Item phone in contact.phones ?? []) {
+        if (phone.value != null && contact.displayName != null) {
+          String phoneNumber =
+              phone.value!.replaceAll('+91', '').replaceAll(RegExp(r'\D'), '');
+          if (!dbPhones.contains(phoneNumber)) {
+            myContactList
+                .add(MyContact(phoneNumber, contact.displayName!, "main"));
+          }
+        }
+      }
+    }
+
+    IsarService.addMyContacts(myContactList);
+    debugPrint("added in db ");
+  } catch (e) {
+    debugPrint('Error saving db : $e');
+  }
+  return contactList;
+}
+
+void syncAndDelete() async {
+  deleteContacts(await syncFromLocal());
+}
+
+
+/////////////////////////////////////////////////////////////////////
+// alternate method
+// contacts = (await FastContacts.getAllContacts()).cast<Contact>();

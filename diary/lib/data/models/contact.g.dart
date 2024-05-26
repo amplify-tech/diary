@@ -97,8 +97,8 @@ MyContact _myContactDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = MyContact(
-    reader.readString(offsets[1]),
     reader.readString(offsets[2]),
+    reader.readString(offsets[1]),
     reader.readString(offsets[3]),
   );
   object.dateAdded = reader.readDateTime(offsets[0]);

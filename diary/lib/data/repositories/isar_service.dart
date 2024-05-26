@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 
 class IsarService {
   static late Isar _isar;
+  static Isar get isar => _isar;
 
   static Future<void> initialize() async {
     _isar = Isar.getInstance() ??
