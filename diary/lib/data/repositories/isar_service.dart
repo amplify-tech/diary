@@ -27,9 +27,9 @@ class IsarService {
     });
   }
 
-  static Future<void> deleteMyContact(int id) async {
+  static Future<void> deleteMyContacts(List<int> ids) async {
     await _isar.writeTxn(() async {
-      await _isar.myContacts.delete(id);
+      await _isar.myContacts.deleteAll(ids);
     });
   }
 

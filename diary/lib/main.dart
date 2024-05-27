@@ -22,6 +22,8 @@ class App extends StatelessWidget {
       title: 'Contact Diary',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
+        listTileTheme: ListTileThemeData(
+            selectedTileColor: Colors.lightBlue.withOpacity(0.15)),
         useMaterial3: true,
       ),
       home: const ContactNavigation(),
