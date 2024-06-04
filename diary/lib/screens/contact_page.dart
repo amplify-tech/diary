@@ -144,17 +144,45 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
   }
 
   Future<String?> _tagPopup() async {
-    final tag = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) {
-        return TagFilterBottomSheet(
-          selectedTag: selectedTag,
-          onTagSelected: (tag) {
-            Navigator.pop(context, tag);
-          },
-        );
-      },
-    );
+    final tag = await showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          final controller = TextEditingController();
+          return Container(
+            height: 600,
+            padding:
+                const EdgeInsets.only(top: 20, left: 15, right: 15, bottom: 20),
+            child: Column(
+              children: [
+                Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: TextField(
+                      controller: controller,
+                      decoration: InputDecoration(
+                        labelText: 'Add New Tag',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                      ),
+                      onSubmitted: (value) {
+                        context.read<TagProvider>().addTag(value);
+                        controller.clear(); // Reset the input value
+                      },
+                    )),
+                Expanded(
+                    child: TagFilterBottomSheet(
+                  selectedTag: selectedTag,
+                  onTagSelected: (tag) {
+                    Navigator.pop(context, tag);
+                  },
+                )),
+              ],
+            ),
+          );
+        });
+
     print(tag);
     return tag;
   }
