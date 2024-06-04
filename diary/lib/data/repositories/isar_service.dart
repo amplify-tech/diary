@@ -22,8 +22,11 @@ class IsarService {
   }
 
   static Future<void> addMyContacts(List<MyContact> contacts) async {
+    print("adding");
     await _isar.writeTxn(() async {
+      print("adding ${contacts.length}");
       await _isar.myContacts.putAll(contacts);
+      print("added ${contacts.length}");
     });
   }
 
@@ -33,9 +36,15 @@ class IsarService {
     });
   }
 
-  static Stream<List<MyContact>> watchContacts() {
+  static Stream<List<MyContact>> watchContacts(String tag) {
     print("_isar fetch new");
-    return _isar.myContacts.where().sortByName().watch(fireImmediately: true);
+    return tag == "all"
+        ? _isar.myContacts.where().sortByName().watch(fireImmediately: true)
+        : _isar.myContacts
+            .filter()
+            .tagEqualTo(tag)
+            .sortByName()
+            .watch(fireImmediately: true);
   }
 
   static Future<List<MyContact>> getAllMyContacts() async {

@@ -74,9 +74,10 @@ class _CallLogScreenState extends State<CallLogScreen> {
   }
 
   Future<void> _getCallLogs() async {
-    Iterable<CallLogEntry> entries = await CallLog.get();
+    print("getting call log");
+    List<CallLogEntry> callLog = await fetchCallLog();
     setState(() {
-      _callLogs = entries.toList();
+      _callLogs = callLog;
     });
   }
 }

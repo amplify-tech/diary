@@ -1,7 +1,6 @@
 import 'package:diary/screens/contact_page.dart';
 import 'package:diary/screens/setting_screen.dart';
 import 'package:diary/utils/utils.dart';
-// import 'package:diary/widgets/extra2.dart';
 import 'package:flutter/material.dart';
 import 'package:diary/screens/call_log_screen.dart';
 
@@ -14,6 +13,11 @@ class ContactNavigation extends StatefulWidget {
 
 class _ContactNavigationState extends State<ContactNavigation> {
   int currentPageIndex = 0;
+  static const List<Widget> _screens = <Widget>[
+    SettingScreen(),
+    CallLogScreen(),
+    ContactPageScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -54,15 +58,10 @@ class _ContactNavigationState extends State<ContactNavigation> {
           ),
         ],
       ),
-      body: <Widget>[
-        const SettingScreen(),
-        const CallLogScreen(),
-        const ContactPageScreen(),
-      ][currentPageIndex],
-      // floatingActionButton: const FloatingActionButton(
-      //   onPressed: null,
-      //   tooltip: 'Add Contact',
-      //   child: Icon(Icons.add),
+      body: _screens[currentPageIndex],
+      // body: IndexedStack(
+      //   index: currentPageIndex,
+      //   children: _screens,
       // ),
     );
   }

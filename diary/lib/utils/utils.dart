@@ -6,6 +6,7 @@ import 'package:isar/isar.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:contacts_service/contacts_service.dart';
+import 'package:call_log/call_log.dart';
 
 // url_launcher
 Future callNumber(phoneNumber) async {
@@ -21,11 +22,24 @@ Future launchWhatsApp(phoneNumber) async {
   }
 }
 
+// call log
+Future<List<CallLogEntry>> fetchCallLog() async {
+  try {
+    if (await Permission.phone.request().isGranted) {
+      debugPrint(" fetching  call log");
+      return (await CallLog.get()).toList();
+    }
+  } catch (e) {
+    debugPrint('Error fetching call log: $e');
+  }
+  return [];
+}
+
 // flutter_contacts
 Future<List<Contact>> fetchContacts() async {
   try {
     if (await Permission.contacts.request().isGranted) {
-      debugPrint(" fetching ");
+      debugPrint(" fetching contact");
       return ContactsService.getContacts();
     }
   } catch (e) {
@@ -85,6 +99,8 @@ Future<List<Contact>> syncFromLocal() async {
         }
       }
     }
+
+    print(myContactList);
 
     IsarService.addMyContacts(myContactList);
     debugPrint("added in db ");
