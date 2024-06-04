@@ -19,6 +19,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
   String selectedTag = 'all';
   final List<MyContact> _selectedContacts = [];
   late Stream<List<MyContact>> getAllContacts;
+  late List<MyContact> contacts;
 
   @override
   void initState() {
@@ -55,6 +56,10 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
         title: Text(selectedTag),
         actions: _isMultiSelectEnabled
             ? [
+                IconButton(icon: const Icon(Icons.close), onPressed: _unSelect),
+                IconButton(
+                    icon: const Icon(Icons.select_all),
+                    onPressed: _selectAllContacts),
                 IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: _deleteSelectedContacts),
@@ -74,7 +79,8 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No contacts found!'));
           }
-          final contacts = snapshot.data!;
+
+          contacts = snapshot.data!;
           return ListView.builder(
             itemCount: contacts.length,
             itemBuilder: (context, index) {
@@ -133,10 +139,31 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
     );
   }
 
+  void _unSelect() {
+    setState(() {
+      _isMultiSelectEnabled = false;
+      _selectedContacts.clear();
+    });
+  }
+
+  void _selectAllContacts() {
+    setState(() {
+      _selectedContacts.clear();
+      _selectedContacts.addAll(contacts);
+    });
+  }
+
   void _deleteSelectedContacts() {
-    List<int> ids = _selectedContacts.map((contact) => contact.id).toList();
-    print("deleting");
-    IsarService.deleteMyContacts(ids);
+    if (selectedTag == "trash") {
+      List<int> ids = _selectedContacts.map((contact) => contact.id).toList();
+      print("deleting");
+      IsarService.deleteMyContacts(ids);
+    } else {
+      List<MyContact> updatedList =
+          _selectedContacts.map((c) => (c..tag = "trash")).toList();
+      print("updating to trash");
+      IsarService.addMyContacts(updatedList);
+    }
     setState(() {
       _isMultiSelectEnabled = false;
       _selectedContacts.clear();
