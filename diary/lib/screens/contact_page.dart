@@ -1,6 +1,5 @@
 import 'package:diary/data/providers/tag_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:diary/data/models/contact.dart';
 import 'package:diary/utils/utils.dart';
 import 'package:diary/data/repositories/isar_service.dart';
@@ -38,11 +37,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
     print("back button");
     if (_isMultiSelectEnabled) {
       print("back button in me");
-
-      setState(() {
-        _isMultiSelectEnabled = false;
-        _selectedContacts.clear();
-      });
+      _disableMultiSelect();
       return true; // Prevent default back button
     }
     print("back button out");
@@ -56,7 +51,9 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
         title: Text(selectedTag),
         actions: _isMultiSelectEnabled
             ? [
-                IconButton(icon: const Icon(Icons.close), onPressed: _unSelect),
+                IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: _disableMultiSelect),
                 IconButton(
                     icon: const Icon(Icons.select_all),
                     onPressed: _selectAllContacts),
@@ -91,8 +88,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                   child: Text(contact.name[0].toUpperCase()),
                 ),
                 title: Text(contact.name),
-                subtitle: Text(
-                    "${DateFormat('h:mm:ss').format(contact.dateAdded)} ${contact.tag}"),
+                subtitle: Text(contact.phoneNumber),
                 trailing: Wrap(
                   spacing: 18,
                   children: <Widget>[
@@ -139,7 +135,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
     );
   }
 
-  void _unSelect() {
+  void _disableMultiSelect() {
     setState(() {
       _isMultiSelectEnabled = false;
       _selectedContacts.clear();
@@ -154,20 +150,37 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
   }
 
   void _deleteSelectedContacts() {
-    if (selectedTag == "trash") {
+    if (selectedTag != "trash") {
+      _moveTag("trash");
+    } else {
       List<int> ids = _selectedContacts.map((contact) => contact.id).toList();
       print("deleting");
       IsarService.deleteMyContacts(ids);
-    } else {
-      List<MyContact> updatedList =
-          _selectedContacts.map((c) => (c..tag = "trash")).toList();
-      print("updating to trash");
-      IsarService.addMyContacts(updatedList);
+      _disableMultiSelect();
     }
-    setState(() {
-      _isMultiSelectEnabled = false;
-      _selectedContacts.clear();
-    });
+  }
+
+  void _moveTag([String? newTag]) async {
+    print("updating 1 $newTag");
+    newTag ??= await _tagPopup(); // show popup if new tag not given
+    if (newTag != null && newTag != "all") {
+      List<MyContact> updatedList =
+          _selectedContacts.map((c) => (c..tag = newTag!)).toList();
+      print("updating");
+      IsarService.addMyContacts(updatedList);
+      _disableMultiSelect();
+    }
+  }
+
+  void _filterTag() async {
+    print("filtering 1");
+    String? tag = await _tagPopup();
+    if (tag != null) {
+      setState(() {
+        selectedTag = tag;
+        getAllContacts = IsarService.watchContacts(selectedTag);
+      });
+    }
   }
 
   Future<String?> _tagPopup() async {
@@ -198,13 +211,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                         controller.clear(); // Reset the input value
                       },
                     )),
-                Expanded(
-                    child: TagFilterBottomSheet(
-                  selectedTag: selectedTag,
-                  onTagSelected: (tag) {
-                    Navigator.pop(context, tag);
-                  },
-                )),
+                Expanded(child: TagList(selectedTag)),
               ],
             ),
           );
@@ -213,40 +220,11 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
     print(tag);
     return tag;
   }
-
-  void _filterTag() async {
-    print("filtering 1");
-    String? tag = await _tagPopup();
-    if (tag != null) {
-      setState(() {
-        selectedTag = tag;
-        getAllContacts = IsarService.watchContacts(selectedTag);
-      });
-    }
-  }
-
-  void _moveTag() async {
-    print("updating 1");
-    String? tag = await _tagPopup();
-    if (tag != null && tag != "all") {
-      List<MyContact> updatedList =
-          _selectedContacts.map((c) => (c..tag = tag)).toList();
-      print("updating");
-      IsarService.addMyContacts(updatedList);
-      setState(() {
-        _isMultiSelectEnabled = false;
-        _selectedContacts.clear();
-      });
-    }
-  }
 }
 
-class TagFilterBottomSheet extends StatelessWidget {
+class TagList extends StatelessWidget {
   final String selectedTag;
-  final Function(String) onTagSelected;
-
-  const TagFilterBottomSheet(
-      {super.key, required this.selectedTag, required this.onTagSelected});
+  const TagList(this.selectedTag, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +242,7 @@ class TagFilterBottomSheet extends StatelessWidget {
             ),
             Text(entry.value.toString()),
           ]),
-          onTap: () => onTagSelected(entry.key),
+          onTap: () => Navigator.pop(context, entry.key),
         );
       },
     );
