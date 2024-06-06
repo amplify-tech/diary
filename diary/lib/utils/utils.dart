@@ -1,5 +1,6 @@
 import 'package:diary/data/models/contact.dart';
 import 'package:diary/data/repositories/isar_service.dart';
+import 'package:diary/utils/x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:isar/isar.dart';
@@ -8,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:call_log/call_log.dart';
 
+/////////////////////////////////////////////////////////////////////
 // url_launcher
 Future callNumber(phoneNumber) async {
   await FlutterPhoneDirectCaller.callNumber(phoneNumber);
@@ -22,6 +24,7 @@ Future launchWhatsApp(phoneNumber) async {
   }
 }
 
+/////////////////////////////////////////////////////////////////////
 // call log
 Future<List<CallLogEntry>> fetchCallLog() async {
   try {
@@ -35,12 +38,13 @@ Future<List<CallLogEntry>> fetchCallLog() async {
   return [];
 }
 
+/////////////////////////////////////////////////////////////////////
 // flutter_contacts
-Future<List<Contact>> fetchContacts() async {
+Future<List<Contact>> getContactsFromLocal() async {
   try {
     if (await Permission.contacts.request().isGranted) {
       debugPrint(" fetching contact");
-      return ContactsService.getContacts();
+      return ContactsService.getContacts(withThumbnails: false);
     }
   } catch (e) {
     debugPrint('Error fetching contacts: $e');
@@ -48,7 +52,7 @@ Future<List<Contact>> fetchContacts() async {
   return [];
 }
 
-void deleteContacts(List<Contact> contactList) async {
+void deleteContactsFromLocal(List<Contact> contactList) async {
   debugPrint("deleting");
   for (final contact in contactList) {
     try {
@@ -60,22 +64,53 @@ void deleteContacts(List<Contact> contactList) async {
   debugPrint("all contact deleted");
 }
 
-void addContact() async {
-  final newContact = Contact()
-    ..givenName = 'John'
-    ..phones = [
-      Item(label: "Mobile", value: '+918085904091'),
-    ];
-  await ContactsService.addContact(newContact);
-  debugPrint("new contact added $newContact");
+void addContactToLocal(List<Contact> contactList) async {
+  debugPrint("adding to local");
+  for (final contact in contactList) {
+    try {
+      await ContactsService.addContact(contact);
+    } catch (e) {
+      debugPrint('Error while adding contacts: $e ${contact.givenName}');
+    }
+  }
+  debugPrint(" ${contactList.length} all contact added");
 }
 
+void savefromfile() {
+  print(lsc.length);
+  List<Contact> updatedList = lsc
+      .map((c) => (Contact(givenName: c[1], phones: [
+            Item(label: "Mobile", value: c[0]),
+          ])))
+      .toList();
+  addContactToLocal(updatedList);
+}
+
+void savefromfiletoisar() {
+  print(lsc.length);
+  print("saving from file to isar");
+  List<MyContact> myContactList =
+      lsc.map((c) => (MyContact(c[0], c[1], c[2]))).toList();
+  IsarService.addMyContacts(myContactList);
+}
+
+void dataClean() async {
+  List<MyContact> contactList = await IsarService.getAllMyContacts();
+
+  for (final c in contactList) {
+    if (c.phoneNumber.length != 10) {
+      print("${c.phoneNumber} ${c.tag} ${c.name}");
+    }
+  }
+}
+
+/////////////////////////////////////////////////////////////////////
 // isar Db
 Future<List<Contact>> syncFromLocal() async {
   List<Contact> contactList = [];
 
   try {
-    contactList = await fetchContacts();
+    contactList = await getContactsFromLocal();
     debugPrint("contact fetched ${contactList.length}");
 
     List<MyContact> myContactList = [];
@@ -88,19 +123,25 @@ Future<List<Contact>> syncFromLocal() async {
         .toSet();
 
     for (final contact in contactList) {
+      // if (contact.phones == null ||
+      //     contact.phones!.isEmpty ||
+      //     contact.phones!.length > 1 ||
+      //     contact.displayName == null) {
+      //   print("invlid ${contact.phones!.length} ${contact.displayName}");
+      // }
       for (Item phone in contact.phones ?? []) {
         if (phone.value != null && contact.displayName != null) {
           String phoneNumber =
               phone.value!.replaceAll('+91', '').replaceAll(RegExp(r'\D'), '');
           if (!dbPhones.contains(phoneNumber)) {
             myContactList
-                .add(MyContact(phoneNumber, contact.displayName!, "main"));
+                .add(MyContact(phoneNumber, contact.displayName!, "local"));
           }
         }
       }
     }
 
-    print(myContactList);
+    print(" added from local ${myContactList.length}");
 
     IsarService.addMyContacts(myContactList);
     debugPrint("added in db ");
@@ -111,8 +152,13 @@ Future<List<Contact>> syncFromLocal() async {
 }
 
 void syncAndDelete() async {
-  deleteContacts(await syncFromLocal());
+  deleteContactsFromLocal(await syncFromLocal());
 }
+
+void justDelete() async {
+  deleteContactsFromLocal(await getContactsFromLocal());
+}
+
 
 
 /////////////////////////////////////////////////////////////////////

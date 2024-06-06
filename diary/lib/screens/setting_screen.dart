@@ -15,10 +15,15 @@ class _SettingScreenState extends State<SettingScreen> {
         body:
             Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
       Column(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-        ElevatedButton(onPressed: fetchContacts, child: Text('fetch')),
+        ElevatedButton(
+            onPressed: savefromfiletoisar,
+            child: Text('save from file to isar')),
+        ElevatedButton(onPressed: savefromfile, child: Text('save to local')),
+        ElevatedButton(onPressed: getContactsFromLocal, child: Text('fetch')),
         ElevatedButton(onPressed: syncFromLocal, child: Text('sync')),
         ElevatedButton(
             onPressed: syncAndDelete, child: Text('sync and delete ')),
+        ElevatedButton(onPressed: justDelete, child: Text('just delete local')),
       ]),
     ]));
   }

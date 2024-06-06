@@ -24,7 +24,7 @@ class TagProvider with ChangeNotifier {
   void addTag(String tag) {
     if (!_tagCountMap.keys.contains(tag)) {
       _tagCountMap[tag] = 0;
-      notifyListeners();
+      // notifyListeners();
     }
   }
 }

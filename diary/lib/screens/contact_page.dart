@@ -5,6 +5,7 @@ import 'package:diary/utils/utils.dart';
 import 'package:diary/data/repositories/isar_service.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:provider/provider.dart';
+import 'package:contacts_service/contacts_service.dart';
 
 class ContactPageScreen extends StatefulWidget {
   const ContactPageScreen({super.key});
@@ -15,7 +16,7 @@ class ContactPageScreen extends StatefulWidget {
 
 class _ContactPageScreenState extends State<ContactPageScreen> {
   bool _isMultiSelectEnabled = false;
-  String selectedTag = 'all';
+  String selectedTag = 'main';
   final List<MyContact> _selectedContacts = [];
   late Stream<List<MyContact>> getAllContacts;
   late List<MyContact> contacts;
@@ -58,9 +59,13 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                     icon: const Icon(Icons.select_all),
                     onPressed: _selectAllContacts),
                 IconButton(
+                    icon: const Icon(Icons.swap_horiz), onPressed: _moveTag),
+                IconButton(
+                    icon: const Icon(Icons.file_download_outlined),
+                    onPressed: addtoLocal),
+                IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: _deleteSelectedContacts),
-                IconButton(icon: const Icon(Icons.tag), onPressed: _moveTag),
               ]
             : [
                 IconButton(
@@ -98,7 +103,8 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.chat_rounded),
-                      onPressed: () => launchWhatsApp(contact.phoneNumber),
+                      onPressed: () =>
+                          launchWhatsApp("+91${contact.phoneNumber}"),
                     ),
                   ],
                 ),
@@ -170,6 +176,16 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
       IsarService.addMyContacts(updatedList);
       _disableMultiSelect();
     }
+  }
+
+  void addtoLocal() async {
+    List<Contact> updatedList = _selectedContacts
+        .map((c) => (Contact(givenName: c.name, phones: [
+              Item(label: "Mobile", value: c.phoneNumber),
+            ])))
+        .toList();
+    addContactToLocal(updatedList);
+    _disableMultiSelect();
   }
 
   void _filterTag() async {

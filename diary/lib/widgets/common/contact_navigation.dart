@@ -1,8 +1,8 @@
+import 'package:diary/screens/call_log_screen.dart';
 import 'package:diary/screens/contact_page.dart';
 import 'package:diary/screens/setting_screen.dart';
 import 'package:diary/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:diary/screens/call_log_screen.dart';
 
 class ContactNavigation extends StatefulWidget {
   const ContactNavigation({super.key});
@@ -27,7 +27,7 @@ class _ContactNavigationState extends State<ContactNavigation> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: const <Widget>[
           IconButton(
-            onPressed: syncFromLocal,
+            onPressed: dataClean,
             icon: Icon(Icons.sync),
           )
         ],
