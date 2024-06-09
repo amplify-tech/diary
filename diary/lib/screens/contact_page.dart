@@ -16,7 +16,7 @@ class ContactPageScreen extends StatefulWidget {
 
 class _ContactPageScreenState extends State<ContactPageScreen> {
   bool _isMultiSelectEnabled = false;
-  String selectedTag = 'main';
+  String selectedTag = 'all';
   final List<MyContact> _selectedContacts = [];
   late Stream<List<MyContact>> getAllContacts;
   late List<MyContact> contacts;

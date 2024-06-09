@@ -34,7 +34,7 @@ class _CallLogScreenState extends State<CallLogScreen> {
           subtitle: Wrap(
             spacing: 12,
             children: <Widget>[
-              Text(_callLogs[index].number.toString()),
+              Text("${_callLogs[index].number.toString()}25"),
               Text(DateFormat('h:mm a d - MMM').format(
                   DateTime.fromMillisecondsSinceEpoch(
                       _callLogs[index].timestamp ?? 1 * 1000))),

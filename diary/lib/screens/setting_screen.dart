@@ -1,5 +1,7 @@
 import 'package:diary/utils/utils.dart';
+import 'package:diary/widgets/common/backup_button.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -11,19 +13,20 @@ class SettingScreen extends StatefulWidget {
 class _SettingScreenState extends State<SettingScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
         body:
             Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
       Column(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
+        const BackupButton(),
+        const ElevatedButton(
+            onPressed: handleDownload, child: Text('Download Contact')),
         ElevatedButton(
-            onPressed: savefromfiletoisar,
-            child: Text('save from file to isar')),
-        ElevatedButton(onPressed: savefromfile, child: Text('save to local')),
-        ElevatedButton(onPressed: getContactsFromLocal, child: Text('fetch')),
-        ElevatedButton(onPressed: syncFromLocal, child: Text('sync')),
-        ElevatedButton(
+            child: const Text('Sign Out'),
+            onPressed: () => FirebaseAuth.instance.signOut()),
+        const Text("________________________________"),
+        const ElevatedButton(onPressed: syncFromLocal, child: Text('sync')),
+        const ElevatedButton(
             onPressed: syncAndDelete, child: Text('sync and delete ')),
-        ElevatedButton(onPressed: justDelete, child: Text('just delete local')),
       ]),
     ]));
   }

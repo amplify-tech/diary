@@ -39,11 +39,16 @@ class IsarService {
   static Stream<List<MyContact>> watchContacts(String tag) {
     print("_isar fetch new");
     return tag == "all"
-        ? _isar.myContacts.where().sortByName().watch(fireImmediately: true)
+        ? _isar.myContacts
+            .filter()
+            .not()
+            .tagEqualTo('trash')
+            .sortByPhoneNumber()
+            .watch(fireImmediately: true)
         : _isar.myContacts
             .filter()
             .tagEqualTo(tag)
-            .sortByName()
+            .sortByPhoneNumber()
             .watch(fireImmediately: true);
   }
 
@@ -59,5 +64,13 @@ class IsarService {
 
   static Future<MyContact?> getMyContactById(int id) async {
     return await _isar.myContacts.get(id);
+  }
+
+  static Future<Set<String>> getUniquePhoneNumbers() async {
+    return (await IsarService.isar.myContacts
+            .where()
+            .phoneNumberProperty()
+            .findAll())
+        .toSet();
   }
 }

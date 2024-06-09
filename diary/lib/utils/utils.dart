@@ -1,9 +1,8 @@
 import 'package:diary/data/models/contact.dart';
+import 'package:diary/data/repositories/cloud_service.dart';
 import 'package:diary/data/repositories/isar_service.dart';
-import 'package:diary/utils/x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
-import 'package:isar/isar.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:contacts_service/contacts_service.dart';
@@ -76,34 +75,6 @@ void addContactToLocal(List<Contact> contactList) async {
   debugPrint(" ${contactList.length} all contact added");
 }
 
-void savefromfile() {
-  print(lsc.length);
-  List<Contact> updatedList = lsc
-      .map((c) => (Contact(givenName: c[1], phones: [
-            Item(label: "Mobile", value: c[0]),
-          ])))
-      .toList();
-  addContactToLocal(updatedList);
-}
-
-void savefromfiletoisar() {
-  print(lsc.length);
-  print("saving from file to isar");
-  List<MyContact> myContactList =
-      lsc.map((c) => (MyContact(c[0], c[1], c[2]))).toList();
-  IsarService.addMyContacts(myContactList);
-}
-
-void dataClean() async {
-  List<MyContact> contactList = await IsarService.getAllMyContacts();
-
-  for (final c in contactList) {
-    if (c.phoneNumber.length != 10) {
-      print("${c.phoneNumber} ${c.tag} ${c.name}");
-    }
-  }
-}
-
 /////////////////////////////////////////////////////////////////////
 // isar Db
 Future<List<Contact>> syncFromLocal() async {
@@ -116,19 +87,9 @@ Future<List<Contact>> syncFromLocal() async {
     List<MyContact> myContactList = [];
 
     // data cleaning and ignore duplicate
-    final dbPhones = (await IsarService.isar.myContacts
-            .where()
-            .phoneNumberProperty()
-            .findAll())
-        .toSet();
+    Set<String> dbPhones = await IsarService.getUniquePhoneNumbers();
 
     for (final contact in contactList) {
-      // if (contact.phones == null ||
-      //     contact.phones!.isEmpty ||
-      //     contact.phones!.length > 1 ||
-      //     contact.displayName == null) {
-      //   print("invlid ${contact.phones!.length} ${contact.displayName}");
-      // }
       for (Item phone in contact.phones ?? []) {
         if (phone.value != null && contact.displayName != null) {
           String phoneNumber =
@@ -155,8 +116,42 @@ void syncAndDelete() async {
   deleteContactsFromLocal(await syncFromLocal());
 }
 
-void justDelete() async {
-  deleteContactsFromLocal(await getContactsFromLocal());
+/////////////////////////////////////////////////////////////////////
+// online cloud firebase databse
+void handleBackup() async {
+  try {
+    final contacts = await IsarService.getAllMyContacts();
+    final Map<String, dynamic> contactsJson = contacts.fold({}, (acc, contact) {
+      acc[contact.phoneNumber] = [contact.name, contact.tag];
+      return acc;
+    });
+
+    await CloudService.uploadContact(contactsJson);
+    print('Backup successful!');
+  } catch (e) {
+    print('Error backing up contacts: $e');
+  }
+}
+
+void handleDownload() async {
+  try {
+    Map contactsJson = await CloudService.downloadContact();
+    // ignore duplicate
+    Set<String> dbPhones = await IsarService.getUniquePhoneNumbers();
+    List<MyContact> myContactList = [];
+    for (final entry in contactsJson.entries) {
+      if (!dbPhones.contains(entry.key)) {
+        myContactList.add(MyContact(entry.key, entry.value[0], entry.value[1]));
+      }
+    }
+    IsarService.addMyContacts(myContactList);
+
+    print(myContactList.length);
+    print('Download successful!');
+  } catch (e) {
+    // Handle errors
+    print('Error downloading contacts: $e');
+  }
 }
 
 
