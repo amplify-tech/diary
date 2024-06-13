@@ -26,9 +26,19 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Contact Diary',
       theme: ThemeData(
+        // appBarTheme: const AppBarTheme(
+        //   backgroundColor: Colors.white,
+        //   titleTextStyle: TextStyle(
+        //     fontSize: 24, // Change the font size
+        //     fontWeight: FontWeight.bold, // Change the font weight
+        //   ),
+        // ),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
+        primarySwatch: Colors.lightBlue,
         listTileTheme: ListTileThemeData(
             selectedTileColor: Colors.lightBlue.withOpacity(0.15)),
+        scaffoldBackgroundColor: Colors.white, // Set the body background color
+
         useMaterial3: true,
       ),
       home: const ContactNavigation(),

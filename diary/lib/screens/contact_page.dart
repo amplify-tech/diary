@@ -1,4 +1,5 @@
 import 'package:diary/data/providers/tag_provider.dart';
+import 'package:diary/widgets/common/contact_input.dart';
 import 'package:flutter/material.dart';
 import 'package:diary/data/models/contact.dart';
 import 'package:diary/utils/utils.dart';
@@ -8,7 +9,9 @@ import 'package:provider/provider.dart';
 import 'package:contacts_service/contacts_service.dart';
 
 class ContactPageScreen extends StatefulWidget {
-  const ContactPageScreen({super.key});
+  final ValueNotifier<String> searchTextNotifier;
+
+  const ContactPageScreen({super.key, required this.searchTextNotifier});
 
   @override
   State<ContactPageScreen> createState() => _ContactPageScreenState();
@@ -16,15 +19,15 @@ class ContactPageScreen extends StatefulWidget {
 
 class _ContactPageScreenState extends State<ContactPageScreen> {
   bool _isMultiSelectEnabled = false;
-  String selectedTag = 'all';
+  String selectedTag = 'main';
+  late Stream<List<MyContact>> getAllContacts =
+      IsarService.watchContacts("main");
+  late List<MyContact> filteredContacts;
   final List<MyContact> _selectedContacts = [];
-  late Stream<List<MyContact>> getAllContacts;
-  late List<MyContact> contacts;
 
   @override
   void initState() {
     super.initState();
-    getAllContacts = IsarService.watchContacts(selectedTag);
     BackButtonInterceptor.add(_myInterceptor);
   }
 
@@ -47,30 +50,49 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('''_______________________________________-
+        new contact list page 000''');
     return Scaffold(
       appBar: AppBar(
-        title: Text(selectedTag),
-        actions: _isMultiSelectEnabled
-            ? [
-                IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: _disableMultiSelect),
-                IconButton(
-                    icon: const Icon(Icons.select_all),
-                    onPressed: _selectAllContacts),
-                IconButton(
-                    icon: const Icon(Icons.swap_horiz), onPressed: _moveTag),
-                IconButton(
-                    icon: const Icon(Icons.file_download_outlined),
-                    onPressed: addtoLocal),
-                IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: _deleteSelectedContacts),
-              ]
-            : [
-                IconButton(
-                    icon: const Icon(Icons.filter_list), onPressed: _filterTag),
-              ],
+        toolbarHeight: 52,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        title: Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Row(
+            children: _isMultiSelectEnabled
+                ? [
+                    TextButton.icon(label: Text(selectedTag), onPressed: null),
+                    Spacer(),
+                    IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: _disableMultiSelect),
+                    IconButton(
+                        icon: const Icon(Icons.select_all),
+                        onPressed: _selectAllContacts),
+                    IconButton(
+                        icon: const Icon(Icons.swap_horiz),
+                        onPressed: _moveTag),
+                    IconButton(
+                        icon: const Icon(Icons.file_download_outlined),
+                        onPressed: addtoLocal),
+                    IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: _deleteSelectedContacts),
+                  ]
+                : [
+                    TextButton.icon(
+                        label: Text(selectedTag),
+                        iconAlignment: IconAlignment.end,
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                        onPressed: _filterTag),
+                    Spacer(),
+                    IconButton(
+                        icon: const Icon(Icons.filter_list),
+                        onPressed: _filterTag),
+                  ],
+          ),
+        ),
       ),
       body: StreamBuilder<List<MyContact>>(
         stream: getAllContacts,
@@ -82,62 +104,85 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
             return const Center(child: Text('No contacts found!'));
           }
 
-          contacts = snapshot.data!;
-          return ListView.builder(
-            itemCount: contacts.length,
-            itemBuilder: (context, index) {
-              final contact = contacts[index];
-              return ListTile(
-                selected: _selectedContacts.contains(contact),
-                leading: CircleAvatar(
-                  child: Text(contact.name[0].toUpperCase()),
-                ),
-                title: Text(contact.name),
-                subtitle: Text(contact.phoneNumber),
-                trailing: Wrap(
-                  spacing: 18,
-                  children: <Widget>[
-                    IconButton(
-                      icon: const Icon(Icons.call),
-                      onPressed: () => callNumber(contact.phoneNumber),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.chat_rounded),
-                      onPressed: () =>
-                          launchWhatsApp("+91${contact.phoneNumber}"),
-                    ),
-                  ],
-                ),
-                onLongPress: () {
-                  setState(() {
-                    _isMultiSelectEnabled = true;
-                    if (!_selectedContacts.contains(contact)) {
-                      _selectedContacts.add(contact);
-                    }
-                  });
-                },
-                onTap: () {
-                  if (_isMultiSelectEnabled) {
-                    setState(() {
-                      if (_selectedContacts.contains(contact)) {
-                        _selectedContacts.remove(contact);
-                      } else {
-                        _selectedContacts.add(contact);
-                      }
-                    });
-                  }
-                },
-              );
-            },
-          );
+          return ValueListenableBuilder<String>(
+              valueListenable: widget.searchTextNotifier,
+              builder: (context, searchText, _) {
+                print(searchText.getPhoneNumber());
+
+                if (searchText == "") {
+                  print("case  em");
+                  filteredContacts = snapshot.data!;
+                } else if (searchText.getPhoneNumber() != "") {
+                  print("case  pho");
+
+                  filteredContacts = snapshot.data!.where((contact) {
+                    return contact.phoneNumber
+                        .contains(searchText.getPhoneNumber());
+                  }).toList();
+                } else {
+                  print("case  name");
+
+                  filteredContacts = snapshot.data!.where((contact) {
+                    return contact.name
+                        .toLowerCase()
+                        .contains(searchText.toLowerCase());
+                  }).toList();
+                }
+
+                print('''______________________________________________________
+                       rebuild using search  ${filteredContacts.length}  ${searchText}''');
+
+                return ListView.builder(
+                  itemCount: filteredContacts.length,
+                  itemBuilder: (context, index) {
+                    final contact = filteredContacts[index];
+                    return ListTile(
+                      selected: _selectedContacts.contains(contact),
+                      leading: CircleAvatar(
+                        child: Text(contact.name[0]),
+                      ),
+                      title: Text(contact.name),
+                      subtitle: Text(contact.phoneNumber),
+                      trailing: Wrap(
+                        spacing: 18,
+                        children: <Widget>[
+                          IconButton(
+                            icon: const Icon(Icons.call),
+                            onPressed: () => callNumber(contact.phoneNumber),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.chat_rounded),
+                            onPressed: () =>
+                                launchWhatsApp("+91${contact.phoneNumber}"),
+                          ),
+                        ],
+                      ),
+                      onLongPress: () {
+                        setState(() {
+                          _isMultiSelectEnabled = true;
+                          if (!_selectedContacts.contains(contact)) {
+                            _selectedContacts.add(contact);
+                          }
+                        });
+                      },
+                      onTap: () {
+                        if (_isMultiSelectEnabled) {
+                          setState(() {
+                            if (_selectedContacts.contains(contact)) {
+                              _selectedContacts.remove(contact);
+                            } else {
+                              _selectedContacts.add(contact);
+                            }
+                          });
+                        }
+                      },
+                    );
+                  },
+                );
+              });
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          IsarService.addMyContact(MyContact("857656", "Aaaaa", "relative"));
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: const ContactInputWidget(),
     );
   }
 
@@ -149,9 +194,10 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
   }
 
   void _selectAllContacts() {
+    print("${filteredContacts.length}");
     setState(() {
       _selectedContacts.clear();
-      _selectedContacts.addAll(contacts);
+      _selectedContacts.addAll(filteredContacts);
     });
   }
 
@@ -191,10 +237,14 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
   void _filterTag() async {
     print("filtering 1");
     String? tag = await _tagPopup();
-    if (tag != null) {
+    if (tag != null) changeViewTag(tag);
+  }
+
+  void changeViewTag(String newTag) {
+    if (newTag != selectedTag) {
       setState(() {
-        selectedTag = tag;
-        getAllContacts = IsarService.watchContacts(selectedTag);
+        selectedTag = newTag;
+        getAllContacts = IsarService.watchContacts(newTag);
       });
     }
   }
@@ -224,7 +274,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                       ),
                       onSubmitted: (value) {
                         context.read<TagProvider>().addTag(value);
-                        controller.clear(); // Reset the input value
+                        controller.clear();
                       },
                     )),
                 Expanded(child: TagList(selectedTag)),

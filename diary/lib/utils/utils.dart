@@ -95,8 +95,8 @@ Future<List<Contact>> syncFromLocal() async {
           String phoneNumber =
               phone.value!.replaceAll('+91', '').replaceAll(RegExp(r'\D'), '');
           if (!dbPhones.contains(phoneNumber)) {
-            myContactList
-                .add(MyContact(phoneNumber, contact.displayName!, "local"));
+            myContactList.add(MyContact(
+                phoneNumber, contact.displayName!.capitalize(), "local"));
           }
         }
       }
@@ -154,6 +154,18 @@ void handleDownload() async {
   }
 }
 
+/////////////////////////////////////////////////////////////////////
+/// string formating
+extension StringExtensions on String {
+  String capitalize() {
+    if (isEmpty) return this;
+    return '${this[0].toUpperCase()}${substring(1)}';
+  }
+
+  String getPhoneNumber() {
+    return replaceAll('+91', '').replaceAll(RegExp(r'\D'), '');
+  }
+}
 
 
 /////////////////////////////////////////////////////////////////////

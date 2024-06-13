@@ -1,7 +1,7 @@
 import 'package:diary/screens/call_log_screen.dart';
 import 'package:diary/screens/contact_page.dart';
 import 'package:diary/screens/setting_screen.dart';
-import 'package:diary/utils/utils.dart';
+import 'package:diary/widgets/common/search_bar.dart';
 import 'package:flutter/material.dart';
 
 class ContactNavigation extends StatefulWidget {
@@ -13,25 +13,24 @@ class ContactNavigation extends StatefulWidget {
 
 class _ContactNavigationState extends State<ContactNavigation> {
   int currentPageIndex = 0;
-  static const List<Widget> _screens = <Widget>[
-    SettingScreen(),
-    CallLogScreen(),
-    ContactPageScreen(),
+  final ValueNotifier<String> _searchText = ValueNotifier<String>('');
+
+  late final List<Widget> _screens = <Widget>[
+    ContactPageScreen(searchTextNotifier: _searchText),
+    const SettingScreen(),
+    const CallLogScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contact Diary'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: const <Widget>[
-          IconButton(
-            onPressed: handleBackup,
-            icon: Icon(Icons.sync),
-          )
-        ],
+        toolbarHeight: 66,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        title: SearchBars(searchTextNotifier: _searchText),
       ),
+
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
           setState(() {
