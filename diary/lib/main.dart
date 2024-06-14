@@ -1,47 +1,77 @@
-import 'package:diary/data/providers/tag_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:diary/widgets/common/contact_navigation.dart';
-import 'package:provider/provider.dart';
-import 'package:diary/data/repositories/isar_service.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print('Got a message whilst in the background!');
+  print('Message: ${message.notification?.title}');
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await IsarService.initialize();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp();
+  FirebaseMessaging.instance.getToken().then((token) {
+    print('Res Token: $token');
+  });
 
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (_) => TagProvider()),
-  ], child: const App()));
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Got a message whilst in the foreground!');
+    print('Message: ${message.notification?.title}');
+  });
+
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print('Message clicked!');
+  });
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  runApp(const MyApp());
 }
 
-class App extends StatelessWidget {
-  const App({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Contact Diary',
+      title: 'Flutter Demo',
       theme: ThemeData(
-        // appBarTheme: const AppBarTheme(
-        //   backgroundColor: Colors.white,
-        //   titleTextStyle: TextStyle(
-        //     fontSize: 24, // Change the font size
-        //     fontWeight: FontWeight.bold, // Change the font weight
-        //   ),
-        // ),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
-        primarySwatch: Colors.lightBlue,
-        listTileTheme: ListTileThemeData(
-            selectedTileColor: Colors.lightBlue.withOpacity(0.15)),
-        scaffoldBackgroundColor: Colors.white, // Set the body background color
-
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
       ),
-      home: const ContactNavigation(),
+      home: const MyHomePage(),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final String _lastMessage = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Firebase Messaging Demo'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'Last Message:',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Text(_lastMessage, style: Theme.of(context).textTheme.bodyLarge),
+          ],
+        ),
+      ),
     );
   }
 }
