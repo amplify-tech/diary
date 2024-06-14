@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:phone_state/phone_state.dart';
 
 var kDebugMode = true;
 Future<void> main() async {
@@ -39,12 +40,21 @@ Future<void> main() async {
       print('Message notification: ${message.notification?.body}');
     }
 
-    _showNotification(message);
+    _showNotification(message: message);
   });
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
+  _listenForIncomingCalls();
   runApp(const MyApp());
+}
+
+void _listenForIncomingCalls() {
+  PhoneState.stream.listen((event) {
+    if (event.status == PhoneStateStatus.CALL_INCOMING) {
+      _showNotification(phoneNUmber: event.number);
+    }
+  });
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -57,10 +67,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
   print('Message data: ${message.data}');
 
-  _showNotification(message);
+  _showNotification(message: message);
 }
 
-void _showNotification(RemoteMessage message) {
+void _showNotification({RemoteMessage? message, String? phoneNUmber}) {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -77,11 +87,16 @@ void _showNotification(RemoteMessage message) {
   NotificationDetails notificationDetails =
       NotificationDetails(android: androidNotificationDetails);
 
-  flutterLocalNotificationsPlugin.show(
-      message.notification?.title.hashCode ?? 0,
-      message.notification?.title,
-      message.notification?.body,
-      notificationDetails);
+  if (message != null) {
+    flutterLocalNotificationsPlugin.show(
+        message.notification?.title.hashCode ?? 0,
+        message.notification?.title,
+        message.notification?.body,
+        notificationDetails);
+  } else if (phoneNUmber != null) {
+    flutterLocalNotificationsPlugin.show(phoneNUmber.hashCode,
+        "calling... $phoneNUmber", "name... $phoneNUmber", notificationDetails);
+  }
 }
 
 class MyApp extends StatelessWidget {
