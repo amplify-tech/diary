@@ -1,47 +1,142 @@
-import 'package:diary/data/providers/tag_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:diary/widgets/common/contact_navigation.dart';
-import 'package:provider/provider.dart';
-import 'package:diary/data/repositories/isar_service.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:phone_state/phone_state.dart';
 
-void main() async {
+var kDebugMode = true;
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await IsarService.initialize();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+  await Firebase.initializeApp();
+
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
   );
 
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (_) => TagProvider()),
-  ], child: const App()));
+  if (kDebugMode) {
+    print('Permission granted: ${settings.authorizationStatus}');
+  }
+
+  String? token = await messaging.getToken();
+  if (kDebugMode) {
+    print('Registration Token=$token');
+  }
+
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    if (kDebugMode) {
+      print('Handling a foreground message: ${message.messageId}');
+      print('Message data: ${message.data}');
+      print('Message notification: ${message.notification?.title}');
+      print('Message notification: ${message.notification?.body}');
+    }
+
+    _showNotification(message: message);
+  });
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  _listenForIncomingCalls();
+  runApp(const MyApp());
 }
 
-class App extends StatelessWidget {
-  const App({super.key});
+void _listenForIncomingCalls() {
+  PhoneState.stream.listen((event) {
+    if (event.status == PhoneStateStatus.CALL_INCOMING) {
+      _showNotification(phoneNUmber: event.number);
+    }
+  });
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+
+  if (message.notification != null) {
+    print('Message notification: ${message.notification?.title}');
+    print('Message notification: ${message.notification?.body}');
+  }
+
+  print('Message data: ${message.data}');
+
+  _showNotification(message: message);
+}
+
+void _showNotification({RemoteMessage? message, String? phoneNUmber}) {
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  AndroidInitializationSettings androidSettings =
+      const AndroidInitializationSettings('com.example.diary');
+  InitializationSettings initializationSettings =
+      InitializationSettings(android: androidSettings);
+
+  flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+  AndroidNotificationDetails androidNotificationDetails =
+      const AndroidNotificationDetails('channelId', 'channelName',
+          importance: Importance.max, priority: Priority.high);
+  NotificationDetails notificationDetails =
+      NotificationDetails(android: androidNotificationDetails);
+
+  if (message != null) {
+    flutterLocalNotificationsPlugin.show(
+        message.notification?.title.hashCode ?? 0,
+        message.notification?.title,
+        message.notification?.body,
+        notificationDetails);
+  } else if (phoneNUmber != null) {
+    flutterLocalNotificationsPlugin.show(phoneNUmber.hashCode,
+        "calling... $phoneNUmber", "name... $phoneNUmber", notificationDetails);
+  }
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Contact Diary',
-      theme: ThemeData(
-        // appBarTheme: const AppBarTheme(
-        //   backgroundColor: Colors.white,
-        //   titleTextStyle: TextStyle(
-        //     fontSize: 24, // Change the font size
-        //     fontWeight: FontWeight.bold, // Change the font weight
-        //   ),
-        // ),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
-        primarySwatch: Colors.lightBlue,
-        listTileTheme: ListTileThemeData(
-            selectedTileColor: Colors.lightBlue.withOpacity(0.15)),
-        scaffoldBackgroundColor: Colors.white, // Set the body background color
+    return const MaterialApp(
+      title: 'My App',
+      home: MyHomePage(),
+    );
+  }
+}
 
-        useMaterial3: true,
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final String _lastMessage = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My App'),
       ),
-      home: const ContactNavigation(),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('Last message from Firebase Messaging:',
+                style: Theme.of(context).textTheme.titleLarge),
+            Text(_lastMessage, style: Theme.of(context).textTheme.bodyLarge),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -63,7 +63,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
             children: _isMultiSelectEnabled
                 ? [
                     TextButton.icon(label: Text(selectedTag), onPressed: null),
-                    Spacer(),
+                    const Spacer(),
                     IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: _disableMultiSelect),
@@ -86,7 +86,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                         iconAlignment: IconAlignment.end,
                         icon: const Icon(Icons.keyboard_arrow_down_rounded),
                         onPressed: _filterTag),
-                    Spacer(),
+                    const Spacer(),
                     IconButton(
                         icon: const Icon(Icons.filter_list),
                         onPressed: _filterTag),
@@ -130,7 +130,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                 }
 
                 print('''______________________________________________________
-                       rebuild using search  ${filteredContacts.length}  ${searchText}''');
+                       rebuild using search  ${filteredContacts.length}  $searchText''');
 
                 return ListView.builder(
                   itemCount: filteredContacts.length,
