@@ -6,35 +6,20 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:contacts_service/contacts_service.dart';
-import 'package:call_log/call_log.dart';
 
 /////////////////////////////////////////////////////////////////////
 // url_launcher
 Future callNumber(phoneNumber) async {
-  await FlutterPhoneDirectCaller.callNumber(phoneNumber);
+  await FlutterPhoneDirectCaller.callNumber("+91$phoneNumber");
 }
 
 Future launchWhatsApp(phoneNumber) async {
-  String url = "https://wa.me/$phoneNumber";
+  String url = "https://wa.me/+91$phoneNumber";
   try {
     await launchUrlString(url);
   } catch (e) {
     return false;
   }
-}
-
-/////////////////////////////////////////////////////////////////////
-// call log
-Future<List<CallLogEntry>> fetchCallLog() async {
-  try {
-    if (await Permission.phone.request().isGranted) {
-      debugPrint(" fetching  call log");
-      return (await CallLog.get()).toList();
-    }
-  } catch (e) {
-    debugPrint('Error fetching call log: $e');
-  }
-  return [];
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -92,8 +77,7 @@ Future<List<Contact>> syncFromLocal() async {
     for (final contact in contactList) {
       for (Item phone in contact.phones ?? []) {
         if (phone.value != null && contact.displayName != null) {
-          String phoneNumber =
-              phone.value!.replaceAll('+91', '').replaceAll(RegExp(r'\D'), '');
+          String phoneNumber = phone.value!.getPhoneNumber();
           if (!dbPhones.contains(phoneNumber)) {
             myContactList.add(MyContact(
                 phoneNumber, contact.displayName!.capitalize(), "local"));

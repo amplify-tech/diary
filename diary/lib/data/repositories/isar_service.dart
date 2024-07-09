@@ -1,3 +1,4 @@
+import 'package:diary/data/models/callhistory.dart';
 import 'package:diary/data/models/contact.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,7 +10,7 @@ class IsarService {
   static Future<void> initialize() async {
     _isar = Isar.getInstance() ??
         await Isar.open(
-          [MyContactSchema],
+          [MyContactSchema, CallHistorySchema],
           directory: (await getApplicationDocumentsDirectory()).path,
           inspector: true,
         );
@@ -72,5 +73,24 @@ class IsarService {
             .phoneNumberProperty()
             .findAll())
         .toSet();
+  }
+
+  /////////////////////////////////////////////////////////////////////
+  // call log
+  static Future<void> addCallLogs(List<CallHistory> callLogs) async {
+    print("adding call log");
+    await _isar.writeTxn(() async {
+      print("adding call log ${callLogs.length}");
+      await _isar.callHistorys.putAllByPhoneNumber(callLogs);
+      print("added call log ${callLogs.length}");
+    });
+  }
+
+  static Stream<List<CallHistory>> watchCallLog() {
+    print("_isar fetch new call log");
+    return _isar.callHistorys
+        .where()
+        .sortByLastCallDesc()
+        .watch(fireImmediately: true);
   }
 }
