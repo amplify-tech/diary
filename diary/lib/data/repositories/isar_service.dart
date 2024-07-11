@@ -44,12 +44,12 @@ class IsarService {
             .filter()
             .not()
             .tagEqualTo('trash')
-            .sortByPhoneNumber()
+            .sortByName()
             .watch(fireImmediately: true)
         : _isar.myContacts
             .filter()
             .tagEqualTo(tag)
-            .sortByPhoneNumber()
+            .sortByName()
             .watch(fireImmediately: true);
   }
 

@@ -3,6 +3,7 @@ import 'package:diary/data/repositories/cloud_service.dart';
 import 'package:diary/data/repositories/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:isar/isar.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:contacts_service/contacts_service.dart';
@@ -36,7 +37,7 @@ Future<List<Contact>> getContactsFromLocal() async {
   return [];
 }
 
-void deleteContactsFromLocal(List<Contact> contactList) async {
+Future<void> deleteContactsFromLocal(List<Contact> contactList) async {
   debugPrint("deleting");
   for (final contact in contactList) {
     try {
@@ -80,7 +81,7 @@ Future<List<Contact>> syncFromLocal() async {
           String phoneNumber = phone.value!.getPhoneNumber();
           if (!dbPhones.contains(phoneNumber)) {
             myContactList.add(MyContact(
-                phoneNumber, contact.displayName!.capitalize(), "local"));
+                phoneNumber, contact.displayName!.capitalize(), "special"));
           }
         }
       }
@@ -96,8 +97,23 @@ Future<List<Contact>> syncFromLocal() async {
   return contactList;
 }
 
-void syncAndDelete() async {
-  deleteContactsFromLocal(await syncFromLocal());
+Future<void> syncAndDelete() async {
+  await deleteContactsFromLocal(await syncFromLocal());
+}
+
+// save special contact to device
+void saveToDevice() async {
+  List<MyContact> myContactList = await IsarService.isar.myContacts
+      .filter()
+      .tagContains("special", caseSensitive: false)
+      .findAll();
+
+  List<Contact> deviceList = myContactList
+      .map((c) => (Contact(givenName: c.name, phones: [
+            Item(label: "Mobile", value: c.phoneNumber),
+          ])))
+      .toList();
+  addContactToLocal(deviceList);
 }
 
 /////////////////////////////////////////////////////////////////////

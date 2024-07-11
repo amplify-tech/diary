@@ -27,6 +27,8 @@ class _SettingScreenState extends State<SettingScreen> {
         const ElevatedButton(onPressed: syncFromLocal, child: Text('sync')),
         const ElevatedButton(
             onPressed: syncAndDelete, child: Text('sync and delete ')),
+        const ElevatedButton(
+            onPressed: saveToDevice, child: Text('Save to Device')),
       ]),
     ]));
   }
