@@ -19,9 +19,9 @@ class ContactPageScreen extends StatefulWidget {
 
 class _ContactPageScreenState extends State<ContactPageScreen> {
   bool _isMultiSelectEnabled = false;
-  String selectedTag = 'main';
+  String selectedTag = 'main special';
   late Stream<List<MyContact>> getAllContacts =
-      IsarService.watchContacts("main");
+      IsarService.watchContacts("main special");
   late List<MyContact> filteredContacts;
   final List<MyContact> _selectedContacts = [];
 

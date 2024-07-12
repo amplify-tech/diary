@@ -1,4 +1,6 @@
 import 'package:diary/utils/utils.dart';
+import 'package:diary/widgets/common/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SearchBars extends StatefulWidget {
@@ -39,6 +41,7 @@ class _SearchBarsState extends State<SearchBars> {
                   FocusManager.instance.primaryFocus?.unfocus();
                 },
                 decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.only(top: 2),
                   hintText: "Search Contacts",
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,
@@ -83,11 +86,23 @@ class _SearchBarsState extends State<SearchBars> {
                   Icons.cloud_upload_sharp,
                   color: Colors.grey[800],
                 ),
-                onPressed: handleBackup,
+                onPressed: () => _handleBackupLogin(context),
               ),
           ],
         ),
       ),
     );
+  }
+
+  void _handleBackupLogin(BuildContext context) {
+    if (FirebaseAuth.instance.currentUser != null) {
+      handleBackup();
+    } else {
+      print('wait login');
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    }
   }
 }

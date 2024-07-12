@@ -16,8 +16,8 @@ class _ContactNavigationState extends State<ContactNavigation> {
   final ValueNotifier<String> _searchText = ValueNotifier<String>('');
 
   late final List<Widget> _screens = <Widget>[
-    ContactPageScreen(searchTextNotifier: _searchText),
     const SettingScreen(),
+    ContactPageScreen(searchTextNotifier: _searchText),
     const CallLogScreen(),
   ];
 

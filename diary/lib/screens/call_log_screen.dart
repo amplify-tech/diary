@@ -56,12 +56,12 @@ class _CallLogScreenState extends State<CallLogScreen> {
                   phoneState.status == PhoneStateStatus.CALL_STARTED)) {
             return Column(
               children: [
-                SizedBox(height: 200),
+                const SizedBox(height: 200),
                 Text(
                   "${phoneState.number} \n name \n last call ",
                   style: const TextStyle(fontSize: 24),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 IconButton(
                   icon: const Icon(Icons.chat_rounded),
                   onPressed: () =>
@@ -70,7 +70,7 @@ class _CallLogScreenState extends State<CallLogScreen> {
               ],
             );
           }
-          return SizedBox.shrink();
+          return const SizedBox.shrink();
         },
       ),
       //////////////////
