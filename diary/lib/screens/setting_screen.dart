@@ -1,4 +1,5 @@
 import 'package:diary/utils/utils.dart';
+import 'package:diary/widgets/common/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -18,7 +19,7 @@ Widget heading(String title) {
       ));
 }
 
-Widget fixButton(String title, VoidCallback onPress) {
+Widget fixButton(String title, VoidCallback? onPress) {
   return ElevatedButton(
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(160, 40),
@@ -43,8 +44,12 @@ class _SettingScreenState extends State<SettingScreen> {
           // cloud division
           cardDivider,
           heading("Cloud"),
-          fixButton("Download Contact", handleDownload),
-          fixButton("Sign Out", () => FirebaseAuth.instance.signOut()),
+          FirebaseAuth.instance.currentUser == null
+              ? fixButton("Download Contact", null)
+              : fixButton("Download Contact", handleDownload),
+          FirebaseAuth.instance.currentUser == null
+              ? fixButton("Sign In", login)
+              : fixButton("Sign Out", () => FirebaseAuth.instance.signOut()),
           cardDivider,
 
           // device division
@@ -53,5 +58,12 @@ class _SettingScreenState extends State<SettingScreen> {
           fixButton("Save to Device", saveToDevice),
           cardDivider,
         ]));
+  }
+
+  void login() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
   }
 }
