@@ -1,8 +1,10 @@
+import 'package:diary/data/providers/meta_provider.dart';
 import 'package:diary/screens/call_log_screen.dart';
 import 'package:diary/screens/contact_page.dart';
 import 'package:diary/screens/setting_screen.dart';
 import 'package:diary/widgets/common/search_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ContactNavigation extends StatefulWidget {
   const ContactNavigation({super.key});
@@ -12,7 +14,6 @@ class ContactNavigation extends StatefulWidget {
 }
 
 class _ContactNavigationState extends State<ContactNavigation> {
-  int currentPageIndex = 0;
   final ValueNotifier<String> _searchText = ValueNotifier<String>('');
 
   late final List<Widget> _screens = <Widget>[
@@ -33,12 +34,10 @@ class _ContactNavigationState extends State<ContactNavigation> {
 
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
+          context.read<MetaProvider>().updatePage(index);
         },
         indicatorColor: Theme.of(context).colorScheme.inversePrimary,
-        selectedIndex: currentPageIndex,
+        selectedIndex: context.watch<MetaProvider>().currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(
             selectedIcon: Icon(Icons.settings),
@@ -57,7 +56,7 @@ class _ContactNavigationState extends State<ContactNavigation> {
           ),
         ],
       ),
-      body: _screens[currentPageIndex],
+      body: _screens[context.watch<MetaProvider>().currentPageIndex],
       // body: IndexedStack(
       //   index: currentPageIndex,
       //   children: _screens,

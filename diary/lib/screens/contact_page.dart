@@ -19,9 +19,9 @@ class ContactPageScreen extends StatefulWidget {
 
 class _ContactPageScreenState extends State<ContactPageScreen> {
   bool _isMultiSelectEnabled = false;
-  String selectedTag = 'main special';
+  String selectedTag = 'all';
   late Stream<List<MyContact>> getAllContacts =
-      IsarService.watchContacts("main special");
+      IsarService.watchContacts("all");
   late List<MyContact> filteredContacts;
   final List<MyContact> _selectedContacts = [];
 
@@ -101,7 +101,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
           //   return Container();
           // }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No contacts found!'));
+            return Container();
           }
 
           return ValueListenableBuilder<String>(

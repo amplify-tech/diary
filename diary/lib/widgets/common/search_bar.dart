@@ -1,7 +1,9 @@
+import 'package:diary/data/providers/meta_provider.dart';
 import 'package:diary/utils/utils.dart';
 import 'package:diary/widgets/common/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SearchBars extends StatefulWidget {
   final ValueNotifier<String> searchTextNotifier;
@@ -50,6 +52,7 @@ class _SearchBarsState extends State<SearchBars> {
                 ),
                 onTap: () {
                   print("focus me ");
+                  context.read<MetaProvider>().updatePage(1);
                   setState(() {
                     _isFocused = true;
                   });

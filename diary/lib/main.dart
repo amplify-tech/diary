@@ -1,3 +1,4 @@
+import 'package:diary/data/providers/meta_provider.dart';
 import 'package:diary/data/providers/tag_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:diary/widgets/common/contact_navigation.dart';
@@ -15,6 +16,7 @@ void main() async {
 
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => TagProvider()),
+    ChangeNotifierProvider(create: (_) => MetaProvider()),
   ], child: const App()));
 }
 

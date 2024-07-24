@@ -82,7 +82,7 @@ class _CallLogScreenState extends State<CallLogScreen> {
               //   return Container();
               // }
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text('Call Log not found!'));
+                return Container();
               }
 
               print("hello ${snapshot.data!.length}.");
