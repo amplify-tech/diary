@@ -1,6 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:diary/data/models/contact.dart';
 import 'package:diary/data/repositories/cloud_service.dart';
 import 'package:diary/data/repositories/isar_service.dart';
+import 'package:diary/utils/alert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:isar/isar.dart';
@@ -25,50 +28,53 @@ Future launchWhatsApp(phoneNumber) async {
 
 /////////////////////////////////////////////////////////////////////
 // flutter_contacts
-Future<List<Contact>> getContactsFromLocal() async {
+Future<List<Contact>> getContactsFromLocal(BuildContext context) async {
   try {
     if (await Permission.contacts.request().isGranted) {
-      debugPrint(" fetching contact");
       return ContactsService.getContacts(withThumbnails: false);
     }
   } catch (e) {
-    debugPrint('Error fetching contacts: $e');
+    showSnackbar(context, 'Error fetching contacts: \n $e');
   }
   return [];
 }
 
-Future<void> deleteContactsFromLocal(List<Contact> contactList) async {
-  debugPrint("deleting");
+Future<void> deleteContactsFromLocal(
+    BuildContext context, List<Contact> contactList) async {
+  showSnackbar(context, "${contactList.length} Contact Deleting...");
   for (final contact in contactList) {
     try {
       await ContactsService.deleteContact(contact);
     } catch (e) {
-      debugPrint('Error while deleting contacts: $e ${contact.displayName}');
+      showSnackbar(context,
+          'Error while deleting contacts: ${contact.displayName} \n $e');
     }
   }
-  debugPrint("all contact deleted");
+  showSnackbar(context, "${contactList.length} Contact Deleted!");
 }
 
-void addContactToLocal(List<Contact> contactList) async {
-  debugPrint("adding to local");
+void addContactToLocal(BuildContext context, List<Contact> contactList) async {
+  showSnackbar(context, "${contactList.length} Contacts Saving...");
   for (final contact in contactList) {
     try {
       await ContactsService.addContact(contact);
     } catch (e) {
-      debugPrint('Error while adding contacts: $e ${contact.givenName}');
+      showSnackbar(
+          context, 'Error while adding contacts: ${contact.givenName} \n $e');
     }
   }
-  debugPrint(" ${contactList.length} all contact added");
+  showSnackbar(context, "${contactList.length} Contacts Saved!");
 }
 
 /////////////////////////////////////////////////////////////////////
 // isar Db
-Future<List<Contact>> syncFromLocal() async {
+Future<List<Contact>> syncFromLocal(BuildContext context) async {
   List<Contact> contactList = [];
+  showSnackbar(context, "Syncing from local...");
 
   try {
-    contactList = await getContactsFromLocal();
-    debugPrint("contact fetched ${contactList.length}");
+    contactList = await getContactsFromLocal(context);
+    showSnackbar(context, "${contactList.length} Contacts Fetched");
 
     List<MyContact> myContactList = [];
 
@@ -87,22 +93,20 @@ Future<List<Contact>> syncFromLocal() async {
       }
     }
 
-    print(" added from local ${myContactList.length}");
-
-    IsarService.addMyContacts(myContactList);
-    debugPrint("added in db ");
+    await IsarService.addMyContacts(myContactList);
+    showSnackbar(context, "${contactList.length} Contacts Added");
   } catch (e) {
-    debugPrint('Error saving db : $e');
+    showSnackbar(context, 'Error saving db : \n $e');
   }
   return contactList;
 }
 
-Future<void> syncAndDelete() async {
-  await deleteContactsFromLocal(await syncFromLocal());
+Future<void> syncAndDelete(BuildContext context) async {
+  await deleteContactsFromLocal(context, await syncFromLocal(context));
 }
 
 // save special contact to device
-void saveToDevice() async {
+void saveToDevice(BuildContext context) async {
   List<MyContact> myContactList = await IsarService.isar.myContacts
       .filter()
       .tagContains("special", caseSensitive: false)
@@ -113,28 +117,31 @@ void saveToDevice() async {
             Item(label: "Mobile", value: c.phoneNumber),
           ])))
       .toList();
-  addContactToLocal(deviceList);
+  addContactToLocal(context, deviceList);
 }
 
 /////////////////////////////////////////////////////////////////////
 // online cloud firebase databse
-void handleBackup() async {
+void handleBackup(BuildContext context) async {
   try {
     final contacts = await IsarService.getAllMyContacts();
+    showSnackbar(context, "${contacts.length} Contacts Uploading...");
+
     final Map<String, dynamic> contactsJson = contacts.fold({}, (acc, contact) {
       acc[contact.phoneNumber] = [contact.name, contact.tag];
       return acc;
     });
 
     await CloudService.uploadContact(contactsJson);
-    print('Backup successful!');
+    showSnackbar(context, "Backup Successful (${contacts.length} Contacts)");
   } catch (e) {
-    print('Error backing up contacts: $e');
+    showSnackbar(context, 'Backup Failed! \n $e');
   }
 }
 
-void handleDownload() async {
+void handleDownload(BuildContext context) async {
   try {
+    showSnackbar(context, 'Downloading...');
     Map contactsJson = await CloudService.downloadContact();
     // ignore duplicate
     Set<String> dbPhones = await IsarService.getUniquePhoneNumbers();
@@ -144,13 +151,10 @@ void handleDownload() async {
         myContactList.add(MyContact(entry.key, entry.value[0], entry.value[1]));
       }
     }
-    IsarService.addMyContacts(myContactList);
-
-    print(myContactList.length);
-    print('Download successful!');
+    await IsarService.addMyContacts(myContactList);
+    showSnackbar(context, "${myContactList.length}  New Contacts Downloaded)");
   } catch (e) {
-    // Handle errors
-    print('Error downloading contacts: $e');
+    showSnackbar(context, 'Download Failed! \n $e');
   }
 }
 

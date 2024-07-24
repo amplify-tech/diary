@@ -5,7 +5,6 @@ class MetaProvider with ChangeNotifier {
   int get currentPageIndex => _currentPageIndex;
 
   void updatePage(int newPage) {
-    print("updatePage updatePage");
     _currentPageIndex = newPage;
     notifyListeners();
   }

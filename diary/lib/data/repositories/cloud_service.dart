@@ -3,8 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class CloudService {
   static Future<void> uploadContact(Map<String, dynamic> jsonData) async {
-    print("in class u");
-
     final uid = FirebaseAuth.instance.currentUser?.uid;
     final contactRef =
         FirebaseDatabase.instance.ref().child('users/$uid/contacts');
@@ -12,7 +10,6 @@ class CloudService {
   }
 
   static Future<Map> downloadContact() async {
-    print("in class d");
     final uid = FirebaseAuth.instance.currentUser?.uid;
     final contactRef =
         FirebaseDatabase.instance.ref().child('users/$uid/contacts');

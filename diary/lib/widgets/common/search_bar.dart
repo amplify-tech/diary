@@ -20,8 +20,6 @@ class _SearchBarsState extends State<SearchBars> {
 
   @override
   Widget build(BuildContext context) {
-    print('''_______________________________________-
-        new search bar 000000 ''');
     return Padding(
       padding: const EdgeInsets.only(left: 2, right: 2, top: 8),
       child: Container(
@@ -37,7 +35,6 @@ class _SearchBarsState extends State<SearchBars> {
                 controller: _searchController,
                 onChanged: (text) {
                   widget.searchTextNotifier.value = text;
-                  print("inside see ${widget.searchTextNotifier.value}");
                 },
                 onTapOutside: (final event) {
                   FocusManager.instance.primaryFocus?.unfocus();
@@ -51,7 +48,6 @@ class _SearchBarsState extends State<SearchBars> {
                   prefixIcon: Icon(Icons.search),
                 ),
                 onTap: () {
-                  print("focus me ");
                   context.read<MetaProvider>().updatePage(1);
                   setState(() {
                     _isFocused = true;
@@ -81,7 +77,7 @@ class _SearchBarsState extends State<SearchBars> {
                   // color: Colors.grey,
                   color: Colors.grey[800],
                 ),
-                onPressed: syncFromLocal,
+                onPressed: () => syncFromLocal(context),
               ),
             if (!_isFocused)
               IconButton(
@@ -99,9 +95,8 @@ class _SearchBarsState extends State<SearchBars> {
 
   void _handleBackupLogin(BuildContext context) {
     if (FirebaseAuth.instance.currentUser != null) {
-      handleBackup();
+      handleBackup(context);
     } else {
-      print('wait login');
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),

@@ -57,6 +57,7 @@ class _ContactNavigationState extends State<ContactNavigation> {
         ],
       ),
       body: _screens[context.watch<MetaProvider>().currentPageIndex],
+
       // body: IndexedStack(
       //   index: currentPageIndex,
       //   children: _screens,

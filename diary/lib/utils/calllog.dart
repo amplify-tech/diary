@@ -2,7 +2,9 @@ import 'package:call_log/call_log.dart';
 import 'package:diary/data/models/callhistory.dart';
 import 'package:diary/data/models/contact.dart';
 import 'package:diary/data/repositories/isar_service.dart';
+import 'package:diary/utils/alert.dart';
 import 'package:diary/utils/utils.dart';
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -13,24 +15,19 @@ final callTypeMap = {
 };
 /////////////////////////////////////////////////////////////////////
 // call log
-Future<void> syncCallLog() async {
+Future<void> syncCallLog(BuildContext context) async {
   try {
     if (await Permission.phone.request().isGranted) {
-      print(" fetching  call log");
+      showSnackbar(context, 'Fetching  CallLog...');
       int? maxCallTime =
           await IsarService.isar.callHistorys.where().lastCallProperty().max();
 
-      print(maxCallTime);
-
       List<CallLogEntry> newCall =
           (await CallLog.query(dateFrom: maxCallTime)).toList();
-      print(" fetched  call log ${newCall.length}");
       List<CallHistory> newCallHistory = [];
 
       for (final callLog in newCall.reversed) {
-        print(callLog.callType);
         String phoneNumber = callLog.number!.getPhoneNumber();
-
         String? name = callLog.name != callLog.number ? callLog.name : null;
 
         if (name == null || name.isEmpty) {
@@ -44,13 +41,12 @@ Future<void> syncCallLog() async {
             .add(CallHistory(phoneNumber, name, callLog.timestamp!, callType));
       }
 
-      print(" added from local ${newCallHistory.length}");
       if (newCallHistory.isNotEmpty) {
-        IsarService.addCallLogs(newCallHistory);
-        print("added in db");
+        await IsarService.addCallLogs(newCallHistory);
+        showSnackbar(context, 'CallLog Updated!');
       }
     }
   } catch (e) {
-    print('Error fetching call log: $e');
+    showSnackbar(context, 'Error Fetching CallLog: \n $e');
   }
 }

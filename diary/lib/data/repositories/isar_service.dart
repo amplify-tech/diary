@@ -23,11 +23,8 @@ class IsarService {
   }
 
   static Future<void> addMyContacts(List<MyContact> contacts) async {
-    print("adding");
     await _isar.writeTxn(() async {
-      print("adding ${contacts.length}");
       await _isar.myContacts.putAll(contacts);
-      print("added ${contacts.length}");
     });
   }
 
@@ -38,7 +35,6 @@ class IsarService {
   }
 
   static Stream<List<MyContact>> watchContacts(String tag) {
-    print("_isar fetch new");
     return tag == "all"
         ? _isar.myContacts
             .filter()
@@ -78,16 +74,12 @@ class IsarService {
   /////////////////////////////////////////////////////////////////////
   // call log
   static Future<void> addCallLogs(List<CallHistory> callLogs) async {
-    print("adding call log");
     await _isar.writeTxn(() async {
-      print("adding call log ${callLogs.length}");
       await _isar.callHistorys.putAllByPhoneNumber(callLogs);
-      print("added call log ${callLogs.length}");
     });
   }
 
   static Stream<List<CallHistory>> watchCallLog() {
-    print("_isar fetch new call log");
     return _isar.callHistorys
         .where()
         .sortByLastCallDesc()

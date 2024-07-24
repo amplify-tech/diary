@@ -1,4 +1,5 @@
 import 'package:diary/data/providers/tag_provider.dart';
+import 'package:diary/utils/alert.dart';
 import 'package:diary/widgets/common/contact_input.dart';
 import 'package:flutter/material.dart';
 import 'package:diary/data/models/contact.dart';
@@ -38,20 +39,15 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
   }
 
   bool _myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    print("back button");
     if (_isMultiSelectEnabled) {
-      print("back button in me");
       _disableMultiSelect();
       return true; // Prevent default back button
     }
-    print("back button out");
     return false; // Allow
   }
 
   @override
   Widget build(BuildContext context) {
-    print('''_______________________________________-
-        new contact list page 000''');
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 52,
@@ -107,30 +103,20 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
           return ValueListenableBuilder<String>(
               valueListenable: widget.searchTextNotifier,
               builder: (context, searchText, _) {
-                print(searchText.getPhoneNumber());
-
                 if (searchText == "") {
-                  print("case  em");
                   filteredContacts = snapshot.data!;
                 } else if (searchText.getPhoneNumber() != "") {
-                  print("case  pho");
-
                   filteredContacts = snapshot.data!.where((contact) {
                     return contact.phoneNumber
                         .contains(searchText.getPhoneNumber());
                   }).toList();
                 } else {
-                  print("case  name");
-
                   filteredContacts = snapshot.data!.where((contact) {
                     return contact.name
                         .toLowerCase()
                         .contains(searchText.toLowerCase());
                   }).toList();
                 }
-
-                print('''______________________________________________________
-                       rebuild using search  ${filteredContacts.length}  $searchText''');
 
                 return ListView.builder(
                   itemCount: filteredContacts.length,
@@ -194,7 +180,6 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
   }
 
   void _selectAllContacts() {
-    print("${filteredContacts.length}");
     setState(() {
       _selectedContacts.clear();
       _selectedContacts.addAll(filteredContacts);
@@ -206,21 +191,19 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
       _moveTag("trash");
     } else {
       List<int> ids = _selectedContacts.map((contact) => contact.id).toList();
-      print("deleting");
       IsarService.deleteMyContacts(ids);
       _disableMultiSelect();
     }
   }
 
   void _moveTag([String? newTag]) async {
-    print("updating 1 $newTag");
     newTag ??= await _tagPopup(); // show popup if new tag not given
     if (newTag != null && newTag != "all") {
       List<MyContact> updatedList =
           _selectedContacts.map((c) => (c..tag = newTag!)).toList();
-      print("updating");
-      IsarService.addMyContacts(updatedList);
       _disableMultiSelect();
+      await IsarService.addMyContacts(updatedList);
+      showSnackbar(context, "${updatedList.length} Contacts Moved to $newTag");
     }
   }
 
@@ -230,12 +213,11 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
               Item(label: "Mobile", value: c.phoneNumber),
             ])))
         .toList();
-    addContactToLocal(updatedList);
+    addContactToLocal(context, updatedList);
     _disableMultiSelect();
   }
 
   void _filterTag() async {
-    print("filtering 1");
     String? tag = await _tagPopup();
     if (tag != null) changeViewTag(tag);
   }
@@ -283,7 +265,6 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
           );
         });
 
-    print(tag);
     return tag;
   }
 }

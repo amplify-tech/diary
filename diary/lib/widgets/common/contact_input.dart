@@ -1,6 +1,7 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:diary/data/models/contact.dart';
 import 'package:diary/data/repositories/isar_service.dart';
+import 'package:diary/utils/alert.dart';
 import 'package:diary/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -140,13 +141,11 @@ class _ContactInputWidgetState extends State<ContactInputWidget> {
             Contact(givenName: _nameController.text, phones: [
           Item(label: "Mobile", value: _phoneNumberController.text),
         ]));
-        print("saved to device ");
       }
 
       IsarService.addMyContact(MyContact(_phoneNumberController.text,
           _nameController.text.capitalize(), newTag));
-      print(
-          'Contact: added ${_nameController.text}, ${_phoneNumberController.text} $_selectedTag');
+      showSnackbar(context, "${_nameController.text} Contact Added!");
 
       _phoneNumberController.clear();
       _nameController.clear();

@@ -1,3 +1,4 @@
+import 'package:diary/utils/alert.dart';
 import 'package:diary/utils/utils.dart';
 import 'package:diary/widgets/common/login_screen.dart';
 import 'package:flutter/material.dart';
@@ -46,16 +47,20 @@ class _SettingScreenState extends State<SettingScreen> {
           heading("Cloud"),
           FirebaseAuth.instance.currentUser == null
               ? fixButton("Download Contact", null)
-              : fixButton("Download Contact", handleDownload),
+              : fixButton("Download Contact", () => handleDownload(context)),
           FirebaseAuth.instance.currentUser == null
               ? fixButton("Sign In", login)
-              : fixButton("Sign Out", () => FirebaseAuth.instance.signOut()),
+              : fixButton("Sign Out", () {
+                  FirebaseAuth.instance.signOut();
+                  showSnackbar(context,
+                      "${FirebaseAuth.instance.currentUser!.email} Signed Out!");
+                }),
           cardDivider,
 
           // device division
           heading("Device"),
-          fixButton("sync and delete", syncAndDelete),
-          fixButton("Save to Device", saveToDevice),
+          fixButton("sync and delete", () => syncAndDelete(context)),
+          fixButton("Save to Device", () => saveToDevice(context)),
           cardDivider,
         ]));
   }

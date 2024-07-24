@@ -39,7 +39,7 @@ class _CallLogScreenState extends State<CallLogScreen> {
   @override
   void initState() {
     super.initState();
-    syncCallLog();
+    syncCallLog(context);
   }
 
   @override
@@ -49,7 +49,7 @@ class _CallLogScreenState extends State<CallLogScreen> {
         initialData: PhoneState.nothing(),
         stream: PhoneState.stream,
         builder: (context, snapshot) {
-          syncCallLog();
+          syncCallLog(context);
           final phoneState = snapshot.data;
           if (phoneState != null &&
               (phoneState.status == PhoneStateStatus.CALL_INCOMING ||
@@ -84,8 +84,6 @@ class _CallLogScreenState extends State<CallLogScreen> {
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return Container();
               }
-
-              print("hello ${snapshot.data!.length}.");
 
               return ListView.builder(
                 itemCount: snapshot.data!.length,
