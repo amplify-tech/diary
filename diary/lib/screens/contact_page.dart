@@ -295,13 +295,16 @@ class TagList extends StatelessWidget {
         final entry = tagCountMap.entries.elementAt(index);
         return ListTile(
           title: Text(entry.key),
-          trailing: Wrap(spacing: 12, children: <Widget>[
-            Visibility(
-              visible: selectedTag == entry.key,
-              child: const Icon(Icons.check),
-            ),
-            Text(entry.value.toString()),
-          ]),
+          trailing: Wrap(
+              spacing: 12,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                if (selectedTag == entry.key) const Icon(Icons.check),
+                Text(entry.value.toString(), textAlign: TextAlign.center),
+                IconButton(
+                    icon: const Icon(Icons.file_download_outlined),
+                    onPressed: () => saveToDevice(context, tag: entry.key)),
+              ]),
           onTap: () => Navigator.pop(context, entry.key),
         );
       },

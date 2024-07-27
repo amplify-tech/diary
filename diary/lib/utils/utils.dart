@@ -106,11 +106,16 @@ Future<void> syncAndDelete(BuildContext context) async {
 }
 
 // save special contact to device
-void saveToDevice(BuildContext context) async {
-  List<MyContact> myContactList = await IsarService.isar.myContacts
-      .filter()
-      .tagContains("special", caseSensitive: false)
-      .findAll();
+void saveToDevice(BuildContext context, {String? tag}) async {
+  List<MyContact> myContactList = tag == null
+      ? await IsarService.isar.myContacts
+          .filter()
+          .tagContains("special", caseSensitive: false)
+          .findAll()
+      : await IsarService.isar.myContacts
+          .filter()
+          .tagEqualTo(tag, caseSensitive: false)
+          .findAll();
 
   List<Contact> deviceList = myContactList
       .map((c) => (Contact(givenName: c.name, phones: [
@@ -152,7 +157,7 @@ void handleDownload(BuildContext context) async {
       }
     }
     await IsarService.addMyContacts(myContactList);
-    showSnackbar(context, "${myContactList.length}  New Contacts Downloaded)");
+    showSnackbar(context, "${myContactList.length}  New Contacts Downloaded");
   } catch (e) {
     showSnackbar(context, 'Download Failed! \n $e');
   }
