@@ -1,12 +1,11 @@
-import 'package:diary/data/providers/tag_provider.dart';
 import 'package:diary/utils/alert.dart';
-import 'package:diary/widgets/common/contact_input.dart';
+import 'package:diary/widgets/common/contact_input_popup.dart';
+import 'package:diary/widgets/common/taglist_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:diary/data/models/contact.dart';
 import 'package:diary/utils/utils.dart';
 import 'package:diary/data/repositories/isar_service.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
-import 'package:provider/provider.dart';
 import 'package:contacts_service/contacts_service.dart';
 
 class ContactPageScreen extends StatefulWidget {
@@ -77,7 +76,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                         onPressed: _moveTag),
                     IconButton(
                         icon: const Icon(Icons.file_download_outlined),
-                        onPressed: addtoLocal),
+                        onPressed: _addtoLocal),
                     IconButton(
                         icon: const Icon(Icons.delete),
                         onPressed: _deleteSelectedContacts),
@@ -126,8 +125,13 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                     final contact = filteredContacts[index];
                     return ListTile(
                       selected: _selectedContacts.contains(contact),
-                      leading: CircleAvatar(
-                        child: Text(contact.name[0]),
+                      leading: IconButton(
+                        icon: CircleAvatar(
+                          child: Text(contact.name[0]),
+                        ),
+                        onPressed: () => _isMultiSelectEnabled
+                            ? null
+                            : showEditContactPopup(context, contact),
                       ),
                       title: Text(contact.name),
                       subtitle: Text(contact.phoneNumber),
@@ -170,7 +174,10 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
               });
         },
       ),
-      floatingActionButton: const ContactInputWidget(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showEditContactPopup(context, null), // add contact
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
@@ -201,7 +208,8 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
   }
 
   void _moveTag([String? newTag]) async {
-    newTag ??= await _tagPopup(); // show popup if new tag not given
+    newTag ??= await showTagPopup(
+        context, selectedTag); // show popup if new tag not given
     if (newTag != null && newTag != "all") {
       List<MyContact> updatedList =
           _selectedContacts.map((c) => (c..tag = newTag!)).toList();
@@ -211,22 +219,12 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
     }
   }
 
-  void addtoLocal() async {
-    List<Contact> updatedList = _selectedContacts
-        .map((c) => (Contact(givenName: c.name, phones: [
-              Item(label: "Mobile", value: c.phoneNumber),
-            ])))
-        .toList();
-    addContactToLocal(context, updatedList);
-    _disableMultiSelect();
-  }
-
   void _filterTag() async {
-    String? tag = await _tagPopup();
-    if (tag != null) changeViewTag(tag);
+    String? tag = await showTagPopup(context, selectedTag);
+    if (tag != null) _changeViewTag(tag);
   }
 
-  void changeViewTag(String newTag) {
+  void _changeViewTag(String newTag) {
     if (newTag != selectedTag) {
       setState(() {
         selectedTag = newTag;
@@ -244,70 +242,13 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
     }
   }
 
-  Future<String?> _tagPopup() async {
-    final tag = await showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          final controller = TextEditingController();
-          return Container(
-            height: 600,
-            padding:
-                const EdgeInsets.only(top: 20, left: 15, right: 15, bottom: 20),
-            child: Column(
-              children: [
-                Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: TextField(
-                      controller: controller,
-                      decoration: InputDecoration(
-                        labelText: 'Add New Tag',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                      ),
-                      onSubmitted: (value) {
-                        context.read<TagProvider>().addTag(value);
-                        controller.clear();
-                      },
-                    )),
-                Expanded(child: TagList(selectedTag)),
-              ],
-            ),
-          );
-        });
-
-    return tag;
-  }
-}
-
-class TagList extends StatelessWidget {
-  final String selectedTag;
-  const TagList(this.selectedTag, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final tagCountMap = context.watch<TagProvider>().tagCountMap;
-    return ListView.builder(
-      itemCount: tagCountMap.keys.length,
-      itemBuilder: (context, index) {
-        final entry = tagCountMap.entries.elementAt(index);
-        return ListTile(
-          title: Text(entry.key),
-          trailing: Wrap(
-              spacing: 12,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: <Widget>[
-                if (selectedTag == entry.key) const Icon(Icons.check),
-                Text(entry.value.toString(), textAlign: TextAlign.center),
-                IconButton(
-                    icon: const Icon(Icons.file_download_outlined),
-                    onPressed: () => saveToDevice(context, tag: entry.key)),
-              ]),
-          onTap: () => Navigator.pop(context, entry.key),
-        );
-      },
-    );
+  void _addtoLocal() async {
+    List<Contact> updatedList = _selectedContacts
+        .map((c) => (Contact(givenName: c.name, phones: [
+              Item(label: "Mobile", value: c.phoneNumber),
+            ])))
+        .toList();
+    addContactToLocal(context, updatedList);
+    _disableMultiSelect();
   }
 }

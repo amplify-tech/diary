@@ -1,7 +1,9 @@
 import 'package:diary/data/models/callhistory.dart';
+import 'package:diary/data/models/contact.dart';
 import 'package:diary/data/repositories/isar_service.dart';
 import 'package:diary/utils/calllog.dart';
 import 'package:diary/utils/utils.dart';
+import 'package:diary/widgets/common/contact_input_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:phone_state/phone_state.dart';
@@ -90,10 +92,16 @@ class _CallLogScreenState extends State<CallLogScreen> {
                 itemBuilder: (context, index) {
                   final callLog = snapshot.data![index];
                   return ListTile(
-                    leading: CircleAvatar(
-                      child: callLog.name.isNotEmpty
-                          ? Text(callLog.name[0])
-                          : const Icon(Icons.person_rounded),
+                    leading: IconButton(
+                      icon: CircleAvatar(
+                        child: callLog.name.isNotEmpty
+                            ? Text(callLog.name[0])
+                            : const Icon(Icons.person_rounded),
+                      ),
+                      onPressed: () => callLog.name.isEmpty
+                          ? showEditContactPopup(context,
+                              MyContact(callLog.phoneNumber, "", "all"))
+                          : null,
                     ),
                     title: Text(callLog.name.isNotEmpty
                         ? callLog.name
