@@ -20,7 +20,7 @@ class _ContactInputWidgetState extends State<ContactInputWidget> {
   final _dropDownKey = GlobalKey<FormFieldState>();
   final _phoneNumberController = TextEditingController();
   final _nameController = TextEditingController();
-  String _selectedTag = "new added";
+  String _selectedTag = "all";
 
   @override
   Widget build(BuildContext context) {

@@ -12,4 +12,8 @@ class MyContact {
   late DateTime dateAdded = DateTime.now();
 
   MyContact(this.phoneNumber, this.name, this.tag);
+  @override
+  String toString() {
+    return "$phoneNumber - $name";
+  }
 }

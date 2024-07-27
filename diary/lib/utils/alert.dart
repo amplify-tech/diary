@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void showSnackbar(
   BuildContext context,
@@ -20,4 +22,13 @@ void showSnackbar(
           : null,
     ),
   );
+}
+
+void copytoClipBoard(String copyText, String? message) {
+  Clipboard.setData(ClipboardData(text: copyText)).then((_) {
+    if (message != null) {
+      Fluttertoast.showToast(
+          msg: message, backgroundColor: Colors.white, textColor: Colors.black);
+    }
+  });
 }

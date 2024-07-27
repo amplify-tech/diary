@@ -58,14 +58,20 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
           child: Row(
             children: _isMultiSelectEnabled
                 ? [
-                    TextButton.icon(label: Text(selectedTag), onPressed: null),
-                    const Spacer(),
+                    Text(_selectedContacts.length.toString()),
                     IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: _disableMultiSelect),
+                    const Spacer(),
                     IconButton(
                         icon: const Icon(Icons.select_all),
                         onPressed: _selectAllContacts),
+                    IconButton(
+                        icon: const Icon(
+                          Icons.copy,
+                          size: 20,
+                        ),
+                        onPressed: _copytoClipBoard),
                     IconButton(
                         icon: const Icon(Icons.swap_horiz),
                         onPressed: _moveTag),
@@ -81,10 +87,6 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                         label: Text(selectedTag),
                         iconAlignment: IconAlignment.end,
                         icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                        onPressed: _filterTag),
-                    const Spacer(),
-                    IconButton(
-                        icon: const Icon(Icons.filter_list),
                         onPressed: _filterTag),
                   ],
           ),
@@ -192,6 +194,8 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
     } else {
       List<int> ids = _selectedContacts.map((contact) => contact.id).toList();
       IsarService.deleteMyContacts(ids);
+      showSnackbar(context, "${ids.length} Contacts Permanently Deleted!");
+
       _disableMultiSelect();
     }
   }
@@ -228,6 +232,15 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
         selectedTag = newTag;
         getAllContacts = IsarService.watchContacts(newTag);
       });
+    }
+  }
+
+  void _copytoClipBoard() {
+    if (_selectedContacts.isNotEmpty) {
+      String copyText = _selectedContacts.length == 1
+          ? _selectedContacts[0].phoneNumber
+          : _selectedContacts.join(" \n");
+      copytoClipBoard(copyText, "Contact Copied");
     }
   }
 
