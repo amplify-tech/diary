@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:call_log/call_log.dart';
 import 'package:diary/data/models/callhistory.dart';
 import 'package:diary/data/models/contact.dart';
@@ -29,14 +31,12 @@ Future<void> syncCallLog(BuildContext context) async {
       for (final callLog in newCall.reversed) {
         String phoneNumber = callLog.number!.getPhoneNumber();
         String? name = callLog.name != callLog.number ? callLog.name : null;
-
         if (name == null || name.isEmpty) {
           final contact =
               await IsarService.isar.myContacts.getByPhoneNumber(phoneNumber);
           name = contact?.name ?? "";
         }
         int callType = callTypeMap[callLog.callType] ?? 3;
-
         newCallHistory
             .add(CallHistory(phoneNumber, name, callLog.timestamp!, callType));
       }

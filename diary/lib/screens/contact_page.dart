@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:diary/utils/alert.dart';
+import 'package:diary/utils/device_contact.dart';
 import 'package:diary/widgets/common/contact_input_popup.dart';
 import 'package:diary/widgets/common/taglist_popup.dart';
 import 'package:flutter/material.dart';
@@ -75,11 +78,14 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                         icon: const Icon(Icons.swap_horiz),
                         onPressed: _moveTag),
                     IconButton(
+                        icon: const Icon(Icons.delete_outline_rounded),
+                        onPressed: _deleteFromIsar),
+                    IconButton(
                         icon: const Icon(Icons.file_download_outlined),
                         onPressed: _addtoLocal),
                     IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: _deleteSelectedContacts),
+                        icon: const Icon(Icons.delete_rounded),
+                        onPressed: _deleteFromLocal),
                   ]
                 : [
                     TextButton.icon(
@@ -195,18 +201,6 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
     });
   }
 
-  void _deleteSelectedContacts() {
-    if (selectedTag != "trash") {
-      _moveTag("trash");
-    } else {
-      List<int> ids = _selectedContacts.map((contact) => contact.id).toList();
-      IsarService.deleteMyContacts(ids);
-      showSnackbar(context, "${ids.length} Contacts Permanently Deleted!");
-
-      _disableMultiSelect();
-    }
-  }
-
   void _moveTag([String? newTag]) async {
     newTag ??= await showTagPopup(
         context, selectedTag); // show popup if new tag not given
@@ -221,14 +215,10 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
 
   void _filterTag() async {
     String? tag = await showTagPopup(context, selectedTag);
-    if (tag != null) _changeViewTag(tag);
-  }
-
-  void _changeViewTag(String newTag) {
-    if (newTag != selectedTag) {
+    if (tag != null && tag != selectedTag) {
       setState(() {
-        selectedTag = newTag;
-        getAllContacts = IsarService.watchContacts(newTag);
+        selectedTag = tag;
+        getAllContacts = IsarService.watchContacts(tag);
       });
     }
   }
@@ -245,10 +235,32 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
   void _addtoLocal() async {
     List<Contact> updatedList = _selectedContacts
         .map((c) => (Contact(givenName: c.name, phones: [
-              Item(label: "Mobile", value: c.phoneNumber),
+              Item(label: "mobile", value: c.phoneNumber),
             ])))
         .toList();
     addContactToLocal(context, updatedList);
     _disableMultiSelect();
+  }
+
+  void _deleteFromLocal() async {
+    List<Contact> contactList = [];
+    for (final c in _selectedContacts) {
+      final deviceContact = await ContactsService.getContactsForPhone(
+          c.phoneNumber,
+          withThumbnails: false);
+      contactList.addAll(deviceContact);
+    }
+    deleteContactsFromLocal(context, contactList);
+  }
+
+  void _deleteFromIsar() {
+    if (selectedTag != "trash") {
+      _moveTag("trash");
+    } else {
+      List<int> ids = _selectedContacts.map((contact) => contact.id).toList();
+      IsarService.deleteMyContacts(ids);
+      showSnackbar(context, "${ids.length} Contacts Permanently Deleted!");
+      _disableMultiSelect();
+    }
   }
 }

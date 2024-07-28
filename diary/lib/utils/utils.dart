@@ -4,11 +4,11 @@ import 'package:diary/data/models/contact.dart';
 import 'package:diary/data/repositories/cloud_service.dart';
 import 'package:diary/data/repositories/isar_service.dart';
 import 'package:diary/utils/alert.dart';
+import 'package:diary/utils/device_contact.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:isar/isar.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:contacts_service/contacts_service.dart';
 
 /////////////////////////////////////////////////////////////////////
@@ -27,47 +27,7 @@ Future launchWhatsApp(phoneNumber) async {
 }
 
 /////////////////////////////////////////////////////////////////////
-// flutter_contacts
-Future<List<Contact>> getContactsFromLocal(BuildContext context) async {
-  try {
-    if (await Permission.contacts.request().isGranted) {
-      return ContactsService.getContacts(withThumbnails: false);
-    }
-  } catch (e) {
-    showSnackbar(context, 'Error fetching contacts: \n $e');
-  }
-  return [];
-}
-
-Future<void> deleteContactsFromLocal(
-    BuildContext context, List<Contact> contactList) async {
-  showSnackbar(context, "${contactList.length} Contact Deleting...");
-  for (final contact in contactList) {
-    try {
-      await ContactsService.deleteContact(contact);
-    } catch (e) {
-      showSnackbar(context,
-          'Error while deleting contacts: ${contact.displayName} \n $e');
-    }
-  }
-  showSnackbar(context, "${contactList.length} Contact Deleted!");
-}
-
-void addContactToLocal(BuildContext context, List<Contact> contactList) async {
-  showSnackbar(context, "${contactList.length} Contacts Saving...");
-  for (final contact in contactList) {
-    try {
-      await ContactsService.addContact(contact);
-    } catch (e) {
-      showSnackbar(
-          context, 'Error while adding contacts: ${contact.givenName} \n $e');
-    }
-  }
-  showSnackbar(context, "${contactList.length} Contacts Saved!");
-}
-
-/////////////////////////////////////////////////////////////////////
-// isar Db
+// device contact <-> isar Db
 Future<List<Contact>> syncFromLocal(BuildContext context) async {
   List<Contact> contactList = [];
   showSnackbar(context, "Syncing from local...");
@@ -119,7 +79,7 @@ void saveToDevice(BuildContext context, {String? tag}) async {
 
   List<Contact> deviceList = myContactList
       .map((c) => (Contact(givenName: c.name, phones: [
-            Item(label: "Mobile", value: c.phoneNumber),
+            Item(label: "mobile", value: c.phoneNumber),
           ])))
       .toList();
   addContactToLocal(context, deviceList);
