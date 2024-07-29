@@ -47,6 +47,11 @@ class _CallLogScreenState extends State<CallLogScreen> {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
+      ListTile(
+        trailing:
+            IconButton(icon: const Icon(Icons.refresh), onPressed: () => 45),
+      ),
+
       StreamBuilder(
         initialData: PhoneState.nothing(),
         stream: PhoneState.stream,

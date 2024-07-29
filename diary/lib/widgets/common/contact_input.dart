@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:contacts_service/contacts_service.dart';
 import 'package:diary/data/models/contact.dart';
 import 'package:diary/data/repositories/isar_service.dart';
 import 'package:diary/utils/alert.dart';
@@ -139,21 +138,13 @@ class _ContactInputWidgetState extends State<ContactInputWidget> {
     if (_formKey.currentState!.validate()) {
       String newTag = _selectedTag == "all" ? "new added" : _selectedTag;
 
-      if (savetoDevice != null) {
-        if (widget.givenContact != null) {
-          final deviceContact = await ContactsService.getContactsForPhone(
-            widget.givenContact!.phoneNumber,
-          );
-          deleteContactsFromLocal(context, deviceContact);
-        }
-        ContactsService.addContact(
-            Contact(givenName: _nameController.text, phones: [
-          Item(label: "mobile", value: _phoneNumberController.text),
-        ]));
-      }
-
       IsarService.addMyContact(MyContact(_phoneNumberController.text,
           _nameController.text.capitalize(), newTag));
+
+      if (savetoDevice != null) {
+        updateContactToLocal(
+            context, _phoneNumberController.text, _nameController.text);
+      }
 
       showSnackbar(
           context,

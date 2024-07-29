@@ -60,7 +60,9 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
           child: Row(
             children: _isMultiSelectEnabled
                 ? [
-                    Text(_selectedContacts.length.toString()),
+                    Text(_selectedContacts.length.toString(),
+                        style: TextStyle(
+                            fontSize: _selectedContacts.length > 9 ? 14 : 20)),
                     IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: _disableMultiSelect),
@@ -69,10 +71,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
                         icon: const Icon(Icons.select_all),
                         onPressed: _selectAllContacts),
                     IconButton(
-                        icon: const Icon(
-                          Icons.copy,
-                          size: 20,
-                        ),
+                        icon: const Icon(Icons.copy, size: 18),
                         onPressed: _copytoClipBoard),
                     IconButton(
                         icon: const Icon(Icons.swap_horiz),

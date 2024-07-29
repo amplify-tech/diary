@@ -44,3 +44,19 @@ void addContactToLocal(BuildContext context, List<Contact> contactList) async {
   }
   showSnackbar(context, "${contactList.length} Contacts Saved!");
 }
+
+void updateContactToLocal(
+    BuildContext context, String phoneNumber, String name) async {
+  try {
+    final oldContacts = await ContactsService.getContactsForPhone(phoneNumber);
+    for (final contact in oldContacts) {
+      ContactsService.deleteContact(contact);
+    }
+    await ContactsService.addContact(Contact(givenName: name, phones: [
+      Item(label: "mobile", value: phoneNumber),
+    ]));
+    showSnackbar(context, "$name Contact Updated!");
+  } catch (e) {
+    showSnackbar(context, 'Error while updating contacts: $name \n $e');
+  }
+}
