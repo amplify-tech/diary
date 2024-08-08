@@ -5,8 +5,7 @@ import 'package:diary/utils/alert.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-/////////////////////////////////////////////////////////////////////
-// flutter_contacts
+// ContactsService
 Future<List<Contact>> getContactsFromLocal(BuildContext context) async {
   try {
     if (await Permission.contacts.request().isGranted) {

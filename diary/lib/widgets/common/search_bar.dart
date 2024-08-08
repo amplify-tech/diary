@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SearchBars extends StatefulWidget {
-  final ValueNotifier<String> searchTextNotifier;
-
-  const SearchBars({super.key, required this.searchTextNotifier});
+  static final ValueNotifier<String> searchText = ValueNotifier<String>('');
+  // static is imp to share state across widget
+  const SearchBars({super.key});
 
   @override
-  _SearchBarsState createState() => _SearchBarsState();
+  State<SearchBars> createState() => _SearchBarsState();
 }
 
 class _SearchBarsState extends State<SearchBars> {
@@ -34,7 +34,7 @@ class _SearchBarsState extends State<SearchBars> {
               child: TextField(
                 controller: _searchController,
                 onChanged: (text) {
-                  widget.searchTextNotifier.value = text;
+                  SearchBars.searchText.value = text;
                 },
                 onTapOutside: (final event) {
                   FocusManager.instance.primaryFocus?.unfocus();
@@ -48,7 +48,7 @@ class _SearchBarsState extends State<SearchBars> {
                   prefixIcon: Icon(Icons.search),
                 ),
                 onTap: () {
-                  context.read<MetaProvider>().updatePage(1);
+                  context.read<MetaProvider>().updatePage(2);
                   setState(() {
                     _isFocused = true;
                   });
@@ -62,7 +62,7 @@ class _SearchBarsState extends State<SearchBars> {
                   color: Colors.grey[800],
                 ),
                 onPressed: () {
-                  widget.searchTextNotifier.value = "";
+                  SearchBars.searchText.value = "";
                   _searchController.clear();
                   FocusManager.instance.primaryFocus?.unfocus();
                   setState(() {
@@ -74,7 +74,6 @@ class _SearchBarsState extends State<SearchBars> {
               IconButton(
                 icon: Icon(
                   Icons.sync,
-                  // color: Colors.grey,
                   color: Colors.grey[800],
                 ),
                 onPressed: () => syncFromLocal(context),

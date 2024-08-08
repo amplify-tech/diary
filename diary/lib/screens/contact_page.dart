@@ -3,6 +3,7 @@
 import 'package:diary/utils/alert.dart';
 import 'package:diary/utils/device_contact.dart';
 import 'package:diary/widgets/common/contact_input_popup.dart';
+import 'package:diary/widgets/common/search_bar.dart';
 import 'package:diary/widgets/common/taglist_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:diary/data/models/contact.dart';
@@ -12,9 +13,7 @@ import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:contacts_service/contacts_service.dart';
 
 class ContactPageScreen extends StatefulWidget {
-  final ValueNotifier<String> searchTextNotifier;
-
-  const ContactPageScreen({super.key, required this.searchTextNotifier});
+  const ContactPageScreen({super.key});
 
   @override
   State<ContactPageScreen> createState() => _ContactPageScreenState();
@@ -107,7 +106,7 @@ class _ContactPageScreenState extends State<ContactPageScreen> {
           }
 
           return ValueListenableBuilder<String>(
-              valueListenable: widget.searchTextNotifier,
+              valueListenable: SearchBars.searchText,
               builder: (context, searchText, _) {
                 if (searchText == "") {
                   filteredContacts = snapshot.data!;

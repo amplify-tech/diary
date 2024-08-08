@@ -2,6 +2,7 @@ import 'package:diary/data/providers/meta_provider.dart';
 import 'package:diary/screens/call_log_screen.dart';
 import 'package:diary/screens/contact_page.dart';
 import 'package:diary/screens/setting_screen.dart';
+import 'package:diary/utils/calllog.dart';
 import 'package:diary/widgets/common/search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,13 +15,22 @@ class ContactNavigation extends StatefulWidget {
 }
 
 class _ContactNavigationState extends State<ContactNavigation> {
-  final ValueNotifier<String> _searchText = ValueNotifier<String>('');
-
-  late final List<Widget> _screens = <Widget>[
-    const SettingScreen(),
-    ContactPageScreen(searchTextNotifier: _searchText),
+  late final List<Widget> _screens = [
+    Container(),
     const CallLogScreen(),
+    Container()
   ];
+
+  void _navigateToPage(int index) {
+    if (_screens[index] is Container && index == 0) {
+      _screens[index] = const SettingScreen();
+    } else if (_screens[index] is Container && index == 2) {
+      _screens[index] = const ContactPageScreen();
+    } else if (index == 1) {
+      syncCallLog(context);
+    }
+    context.read<MetaProvider>().updatePage(index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +39,10 @@ class _ContactNavigationState extends State<ContactNavigation> {
         toolbarHeight: 66,
         backgroundColor: Colors.white,
         scrolledUnderElevation: 0,
-        title: SearchBars(searchTextNotifier: _searchText),
+        title: const SearchBars(),
       ),
-
       bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          context.read<MetaProvider>().updatePage(index);
-        },
+        onDestinationSelected: _navigateToPage,
         indicatorColor: Theme.of(context).colorScheme.inversePrimary,
         selectedIndex: context.watch<MetaProvider>().currentPageIndex,
         destinations: const <Widget>[
@@ -56,12 +63,10 @@ class _ContactNavigationState extends State<ContactNavigation> {
           ),
         ],
       ),
-      body: _screens[context.watch<MetaProvider>().currentPageIndex],
-
-      // body: IndexedStack(
-      //   index: currentPageIndex,
-      //   children: _screens,
-      // ),
+      body: IndexedStack(
+        index: context.watch<MetaProvider>().currentPageIndex,
+        children: _screens,
+      ),
     );
   }
 }

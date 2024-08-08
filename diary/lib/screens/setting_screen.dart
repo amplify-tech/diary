@@ -4,31 +4,6 @@ import 'package:diary/widgets/common/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-const cardDivider = Divider(
-  height: 36,
-);
-
-Widget heading(String title) {
-  return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 24.0,
-          fontWeight: FontWeight.bold,
-        ),
-      ));
-}
-
-Widget fixButton(String title, VoidCallback? onPress) {
-  return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        minimumSize: const Size(160, 40),
-      ),
-      onPressed: onPress,
-      child: Text(title));
-}
-
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
 
@@ -71,4 +46,30 @@ class _SettingScreenState extends State<SettingScreen> {
       MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+const cardDivider = Divider(
+  height: 36,
+);
+
+Widget heading(String title) {
+  return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 24.0,
+          fontWeight: FontWeight.bold,
+        ),
+      ));
+}
+
+Widget fixButton(String title, VoidCallback? onPress) {
+  return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(160, 40),
+      ),
+      onPressed: onPress,
+      child: Text(title));
 }

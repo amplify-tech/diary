@@ -53,16 +53,6 @@ class IsarService {
     return await _isar.myContacts.where().findAll();
   }
 
-  static Future<void> updateMyContact(MyContact contact) async {
-    await _isar.writeTxn(() async {
-      await _isar.myContacts.put(contact);
-    });
-  }
-
-  static Future<MyContact?> getMyContactById(int id) async {
-    return await _isar.myContacts.get(id);
-  }
-
   static Future<Set<String>> getUniquePhoneNumbers() async {
     return (await IsarService.isar.myContacts
             .where()

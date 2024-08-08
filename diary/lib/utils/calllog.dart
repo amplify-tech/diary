@@ -20,7 +20,7 @@ final callTypeMap = {
 Future<void> syncCallLog(BuildContext context) async {
   try {
     if (await Permission.phone.request().isGranted) {
-      showSnackbar(context, 'Fetching  CallLog...');
+      // showSnackbar(context, 'Fetching  CallLog...');
       int? maxCallTime =
           await IsarService.isar.callHistorys.where().lastCallProperty().max();
 
@@ -43,10 +43,33 @@ Future<void> syncCallLog(BuildContext context) async {
 
       if (newCallHistory.isNotEmpty) {
         await IsarService.addCallLogs(newCallHistory);
-        showSnackbar(context, 'CallLog Updated!');
+        showSnackbar(context, '${newCallHistory.length} New CallLog Added!');
       }
     }
   } catch (e) {
     showSnackbar(context, 'Error Fetching CallLog: \n $e');
+  }
+}
+
+Future<void> nameCallLog(BuildContext context) async {
+  try {
+    List<CallHistory> callLogs =
+        await IsarService.isar.callHistorys.filter().nameIsEmpty().findAll();
+    List<CallHistory> updatedcallLogs = [];
+
+    for (final h in callLogs) {
+      final contact =
+          await IsarService.isar.myContacts.getByPhoneNumber(h.phoneNumber);
+      if (contact != null) {
+        h.name = contact.name;
+        updatedcallLogs.add(h);
+      }
+    }
+    if (updatedcallLogs.isNotEmpty) {
+      await IsarService.addCallLogs(callLogs);
+    }
+    showSnackbar(context, '${updatedcallLogs.length} CallLog Updated!');
+  } catch (e) {
+    showSnackbar(context, 'Error Updating CallLog: \n $e');
   }
 }
