@@ -1,7 +1,7 @@
 import 'package:diary/data/providers/meta_provider.dart';
 import 'package:diary/data/providers/tag_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:diary/widgets/common/contact_navigation.dart';
+import 'package:diary/screens/contact_navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:diary/data/repositories/isar_service.dart';
 import 'package:firebase_core/firebase_core.dart';
