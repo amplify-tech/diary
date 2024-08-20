@@ -7,30 +7,13 @@ import 'package:diary/widgets/common/search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ContactNavigation extends StatefulWidget {
-  const ContactNavigation({super.key});
-
-  @override
-  State<ContactNavigation> createState() => _ContactNavigationState();
-}
-
-class _ContactNavigationState extends State<ContactNavigation> {
-  late final List<Widget> _screens = [
-    Container(),
+class ContactNavigation extends StatelessWidget {
+  static List<Widget> screens = [
+    const SizedBox(),
     const CallLogScreen(),
-    Container()
+    const SizedBox(),
   ];
-
-  void _navigateToPage(int index) {
-    if (_screens[index] is Container && index == 0) {
-      _screens[index] = const SettingScreen();
-    } else if (_screens[index] is Container && index == 2) {
-      _screens[index] = const ContactPageScreen();
-    } else if (index == 1) {
-      syncCallLog(context);
-    }
-    context.read<MetaProvider>().updatePage(index);
-  }
+  const ContactNavigation({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +25,7 @@ class _ContactNavigationState extends State<ContactNavigation> {
         title: const SearchBars(),
       ),
       bottomNavigationBar: NavigationBar(
-        onDestinationSelected: _navigateToPage,
+        onDestinationSelected: (index) => navigateToPage(context, index),
         indicatorColor: Theme.of(context).colorScheme.inversePrimary,
         selectedIndex: context.watch<MetaProvider>().currentPageIndex,
         destinations: const <Widget>[
@@ -65,8 +48,19 @@ class _ContactNavigationState extends State<ContactNavigation> {
       ),
       body: IndexedStack(
         index: context.watch<MetaProvider>().currentPageIndex,
-        children: _screens,
+        children: ContactNavigation.screens,
       ),
     );
   }
+}
+
+void navigateToPage(BuildContext context, int index) {
+  if (ContactNavigation.screens[index] is SizedBox && index == 0) {
+    ContactNavigation.screens[index] = const SettingScreen();
+  } else if (ContactNavigation.screens[index] is SizedBox && index == 2) {
+    ContactNavigation.screens[index] = const ContactPageScreen();
+  } else if (index == 1) {
+    syncCallLog(context);
+  }
+  context.read<MetaProvider>().updatePage(index);
 }

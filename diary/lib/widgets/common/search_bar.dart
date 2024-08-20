@@ -1,4 +1,6 @@
 import 'package:diary/data/providers/meta_provider.dart';
+import 'package:diary/screens/contact_navigation.dart';
+import 'package:diary/screens/contact_page.dart';
 import 'package:diary/utils/utils.dart';
 import 'package:diary/widgets/common/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -48,6 +50,9 @@ class _SearchBarsState extends State<SearchBars> {
                   prefixIcon: Icon(Icons.search),
                 ),
                 onTap: () {
+                  if (ContactNavigation.screens[2] is SizedBox) {
+                    ContactNavigation.screens[2] = const ContactPageScreen();
+                  }
                   context.read<MetaProvider>().updatePage(2);
                   setState(() {
                     _isFocused = true;

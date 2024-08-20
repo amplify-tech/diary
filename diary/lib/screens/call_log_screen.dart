@@ -19,11 +19,6 @@ class _CallLogScreenState extends State<CallLogScreen> {
   late Stream<List<CallHistory>> getCallLog = IsarService.watchCallLog();
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Column(children: [
       ListTile(
