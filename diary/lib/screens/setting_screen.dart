@@ -1,6 +1,7 @@
 import 'package:diary/utils/alert.dart';
 import 'package:diary/utils/utils.dart';
 import 'package:diary/widgets/common/login_screen.dart';
+import 'package:diary/widgets/common/realtime_text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -16,7 +17,12 @@ class _SettingScreenState extends State<SettingScreen> {
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-        child: Column(children: <Widget>[
+        child: ListView(children: <Widget>[
+          // Realtime widget
+          cardDivider,
+          heading("Realtime"),
+          const FirebaseRealtimeTextWidget(),
+
           // cloud division
           cardDivider,
           heading("Cloud"),
@@ -30,9 +36,9 @@ class _SettingScreenState extends State<SettingScreen> {
                   showSnackbar(context,
                       "${FirebaseAuth.instance.currentUser!.email} Signed Out!");
                 }),
-          cardDivider,
 
           // device division
+          cardDivider,
           heading("Device"),
           fixButton("sync and delete", () => syncAndDelete(context)),
           fixButton("Save to Device", () => saveToDevice(context)),
