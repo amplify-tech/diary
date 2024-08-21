@@ -17,11 +17,12 @@ class _SettingScreenState extends State<SettingScreen> {
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-        child: ListView(children: <Widget>[
+        child: SingleChildScrollView(
+            child: Column(children: <Widget>[
           // Realtime widget
           cardDivider,
           heading("Realtime"),
-          const FirebaseRealtimeTextWidget(),
+          const RealtimeTextWidget(),
 
           // cloud division
           cardDivider,
@@ -43,7 +44,7 @@ class _SettingScreenState extends State<SettingScreen> {
           fixButton("sync and delete", () => syncAndDelete(context)),
           fixButton("Save to Device", () => saveToDevice(context)),
           cardDivider,
-        ]));
+        ])));
   }
 
   void login() {
