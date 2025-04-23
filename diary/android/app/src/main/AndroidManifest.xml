@@ -1,5 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+
     <application
+        android:enableOnBackInvokedCallback="false"
         android:label="diary"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
@@ -40,5 +45,6 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <package android:name="com.whatsapp" />
     </queries>
 </manifest>
